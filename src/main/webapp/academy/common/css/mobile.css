@@ -1,0 +1,35 @@
+@charset "utf-8";
+
+@media screen and (min-width:999px) {
+	.layer_popup {/* width:80%; */ width:560px; border: 6px solid #00aee7;}
+
+	.layer-tit {position:fixed; background:#00aee7;}
+	.layer-tit p {/* padding-left:35px; line-height:57px; 2016-11-04*/ padding:9px 0 15px 35px; font-size:24px; }
+	.layer_close {top:50%; right:30px; background:url('../../images/sub/m/layerclose.png') no-repeat; width:29px; height:29px; margin-top:-18px;}
+	.layer_bg {padding:195px 0 36px; }
+	.layer_bg p {margin-bottom:27px; font-size:28px; color:#454545; font-family:'ng_bold';}
+	.layer_bg .btn-m {padding:0; min-width:100px; font-size:22px;}
+
+	.layer_bg.bg1 {background:#fff url('../../images/sub/m/layer_bg1.png') 50% 40px no-repeat;}
+	.layer_bg.bg2 {background:#fff url('../../images/sub/m/layer_bg2.png') 50% 40px no-repeat;}
+	.layer_bg.bg3 {background:#fff url('../../images/sub/m/layer_bg3.png') 50% 40px no-repeat;}
+	.layer_bg.bg4 {background:#fff url('../../images/sub/m/layer_bg4.png') 50% 40px no-repeat;}
+	.layer_bg.bg5 .btn-m {padding:0 15px; line-height:56px;}
+
+}
+/******** width 999 ********/
+@media screen and (min-width:639px) {
+	/* layer popup*/
+	.layer_popup {width: 280px;  border: 3px solid #00aee7;}
+	.layer-tit p {padding: 5px 0 8px 18px; font-size:12px; line-height:1;}
+	.layer_close {top:50%; right:15px; margin-top:-9px; width:15px; height:15px;  background-size:100%}
+	.layer_bg {padding:97px 0 18px; }
+	.layer_bg p {margin-bottom:14px; font-size:14px;}
+	.layer_bg .btn-m {min-width:50px; font-size:11px;}
+	.layer_bg.bg5 > p{font-size: 1em; background: url(../../images/sub/layer_bg5.png) 15px 50% no-repeat;}
+	.layer_bg.bg1 {background:#fff url('../../images/sub/m/layer_bg1.png') 50% 20px no-repeat; background-size:63px auto;}
+	.layer_bg.bg2 {background:#fff url('../../images/sub/m/layer_bg2.png') 50% 20px no-repeat; background-size:63px auto;}
+	.layer_bg.bg3 {background:#fff url('../../images/sub/m/layer_bg3.png') 50% 20px no-repeat; background-size:63px auto;}
+	.layer_bg.bg4 {background:#fff url('../../images/sub/m/layer_bg4.png') 50% 20px no-repeat; background-size:63px auto;}
+	.layer_bg.bg5 .btn-m {line-height:28px;}
+}

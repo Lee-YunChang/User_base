@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="ko">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>공지사항</title>
+        <link rel="stylesheet" href="../../common/css/style.css">
+        <link rel="stylesheet" href="../../common/fonts/font.css">
+        <link rel="stylesheet" href="../../common/css/bootstrap_jy.css">
+        <script type="text/javascript" src="http://code.jquery.com/jquery-3.2.1.min.js"></script>
+        <script type="text/javascript" src="../../common/js/jquery.bxslider.min.js"></script>
+        <script type="text/javascript" src="../../common/js/bootstrap.min.js"></script>
+        <script type="text/javascript" src="../../common/js/ui.js"></script>
+        <!-- <script type="text/javascript" src="../../common/js/jquery.simple-sidebar.min.js"></script> -->
+        <script type="text/javascript" src="../../common/js/ui.js"></script>
+
+    </head>
+    <body>
+        <a href="#Subcontent" class="sr-only sr-only-focusable">콘텐츠로 바로가기</a>
+        <div id="Wrapper">
+            <header>
+                <div class="semin_header">
+                    <!-- Navigation -->
+                    <nav class="navbar navbar-default" role="navigation">
+                        <!-- Brand and toggle get grouped for better mobile display -->
+                        <div class="globalWrap clearfix">
+                            <div class="container center-block">
+                            <a class="navbar-brand" href="#"><div class="logo"><span class="text-hide">서민금융진흥원</span></div></a>
+
+                                <div class="navbar-header">
+                                    <div class="nav navbar-right top-nav">
+                                        <!--login
+                                        <span class="top_global">
+                                            <a href="#" class="a_join">회원가입</a>
+                                            <a href="#" class="a_idpw">id/pw 찾기</a>
+                                        </span>
+
+                                        <a href="" class="btn_login"><span>로그인</span></a>
+                                        <!-- //login-->
+                                        <!-- logout-->
+                                        <span class="top_global">
+                                            <a href="#" class="a_lecture">강사공간</a>
+                                            <a href="#" class="a_mypage">나의공간</a>
+                                        </span>
+
+                                        <a href="" class="btn_login Out"><span>로그아웃</span></a>
+                                        <!-- //logout-->
+                                        <a href="" class="btn_sitemap"><span class="text-hide">전체메뉴</span></a>
+                                        <button type="button" class="navbar-toggle" id="btn-sidebar">
+                                            <span class="sr-only">전체메뉴</span>
+                                            <span class="icon-bar"></span>
+                                            <span class="icon-bar"></span>
+                                            <span class="icon-bar"></span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+
+                        <div class="gnbposi">
+                            <div class="seominGnbWrap">
+                                <div class="container center-block">
+                                    <div class="formobile" id="main-sidebar">
+                                        <div class="mGnbTop">
+                                            <span class="mGnb_tit">전체메뉴</span>
+                                        </div>
+
+                                        <ul class="ul_gnb">
+                                            <li>
+                                                <a href="#none" class="a_1dep">온라인교육</a>
+                                                <div class="subMnWrap">
+                                                    <ul>
+                                                        <li><a href="" class="a_2dep">교육안내</a></li>
+                                                        <li><a href="" class="a_2dep">대출이용자교육</a></li>
+                                                        <li><a href="" class="a_2dep">상담직원교육</a></li>
+                                                        <li><a href="" class="a_2dep">금융소비자교육</a></li>
+                                                        <li><a href="" class="a_2dep">유관기관이용자</a></li>
+                                                    </ul>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <a href="#none" class="a_1dep">집합교육</a>
+                                                <div class="subMnWrap">
+                                                    <ul>
+                                                        <li><a href="" class="a_2dep">교육안내</a></li>
+                                                        <li><a href="" class="a_2dep">대출이용자교육</a></li>
+                                                        <li><a href="" class="a_2dep">상담직원교육</a></li>
+                                                        <li><a href="" class="a_2dep">금융소비자교육</a></li>
+                                                        <li><a href="" class="a_2dep">기타교육</a></li>
+                                                        <li><a href="" class="a_2dep">유관기관특호교육</a></li>
+                                                    </ul>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <a href="#none" class="a_1dep">방문교육</a>
+                                                <div class="subMnWrap">
+                                                    <ul>
+                                                        <li><a href="" class="a_2dep">교육안내</a></li>
+                                                        <li><a href="" class="a_2dep">교육신청</a></li>
+                                                    </ul>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <a href="#none" class="a_1dep">알림마당</a>
+                                                <div class="subMnWrap">
+                                                    <ul>
+                                                        <li><a href="" class="a_2dep">공지사항</a></li>
+                                                        <li><a href="" class="a_2dep">자료실</a></li>
+                                                        <li><a href="" class="a_2dep">자주묻는질문</a></li>
+                                                        <li><a href="" class="a_2dep">전체교육과정</a></li>
+                                                        <li><a href="" class="a_2dep">교육소식</a></li>
+                                                        <li><a href="" class="a_2dep">금융상식TEST</a></li>
+                                                        <li><a href="" class="a_2dep">금융용어사전</a></li>
+                                                    </ul>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <a href="#none" class="a_1dep">나의공간</a>
+                                                <div class="subMnWrap">
+                                                    <ul>
+                                                        <li><a href="" class="a_2dep">나의 강의실</a></li>
+                                                        <li><a href="" class="a_2dep">방문교육신청현황</a></li>
+                                                        <li><a href="" class="a_2dep">개인정보수정</a></li>
+                                                    </ul>
+                                                </div>
+                                            </li>
+                                        </ul>
+                                        <button type="button" class="menuClose"><span class="text-hide">전체메뉴닫기</span></button>
+                                    </div>
+
+
+                                </div>
+                            </div>
+                        </div>
+                    </nav>
+                </div>
+
+            </header>
+            <!-- content -->
+            <div class="container" id="Subcontent">
+                <article class="subArea">
+                    <div class="subCntWrap">
+                        <div class="leftMn">
+                            <h1 class="ltTitle">
+                                <span class="bold">안내공간</span>
+                            </h1>
+                            <nav>
+                                <ul class="leftNavi">
+                                    <li><a href="">공지사항</a></li>
+                                    <li><a href="">교육안내</a></li>
+                                    <li><a href="">자주묻는질문</a></li>
+                                    <li><a href="">교육일정표</a></li>
+                                    <li><a href="" class="active">금융상식TEST</a></li>
+                                </ul>
+                            </nav>
+                        </div>
+
+                        <div class="subConts">
+                            <section class="contTop">
+                                <div class="path">
+                                    <ul>
+                                        <li><span class="home text-hide">홈</span></li>
+                                        <li>안내공간</li>
+                                        <li class="active">금융상식TEST</li>
+                                    </ul>
+                                </div>
+                                <h2 class="h2_tit">금융상식TEST</h2>
+                            </section>
+
+                            <section>
+                                <h3 class="bdrTit mrg_b30">기본기 테스트</h3>
+
+                                <div class="borBox">
+                                    <div class="textQ">
+                                        <div class="test_num bold">1</div>
+                                        <div class="txt_Q"><p class="bold fnt16"><span class="po_C4">[객관식]</span> 다음 중 창업의 정의가 맞는 것은?</p></div>
+                                    </div>
+                                    <div class="testA">
+                                        <ul class="ul_radio">
+                                            <li><input type="radio" name="testA01" id="testA01_1"> <label for="testA01_1">먹고 살기 힘들어서 하는 행위</label></li>
+                                            <li><input type="radio" name="testA01" id="testA01_2"> <label for="testA01_2">대충 시작하고 안되면 접어도 괜찮은 행위</label></li>
+                                            <li><input type="radio" name="testA01" id="testA01_3"><label for="testA01_3">옆집에서 시작하니까 나도 따라하는 행위</label></li>
+                                            <li><input type="radio" name="testA01" id="testA01_4"> <label for="testA01_4">시장가치와 비전을 확인하고 신중하게 시작하는 행위</label></li>
+                                        </ul>
+                                    </div>
+                                </div>
+
+                                <hr>
+
+                                <div class="borBox">
+                                    <div class="textQ">
+                                        <div class="test_num bold">2</div>
+                                        <div class="txt_Q"><p class="bold fnt16"><span class="po_C4">[객관식]</span> 다음 중 창업의 정의가 맞는 것은?</p></div>
+                                    </div>
+                                    <div class="testA">
+                                        <ul class="ul_radio">
+                                            <li><input type="radio" name="testA01" id="testA02_1"> <label for="testA02_1">돈</label></li>
+                                            <li><input type="radio" name="testA01" id="testA02_2"> <label for="testA02_2">펀드/주식</label></li>
+                                            <li><input type="radio" name="testA01" id="testA02_3"><label for="testA02_3">대출</label></li>
+                                            <li><input type="radio" name="testA01" id="testA02_4"> <label for="testA02_4">벽돌</label></li>
+                                        </ul>
+                                    </div>
+                                </div>
+
+                                <hr>
+
+                                <div class="borBox">
+                                    <div class="textQ">
+                                        <div class="test_num bold">3</div>
+                                        <div class="txt_Q"><p class="bold fnt16"><span class="po_C4">[서술형]</span> 창업이란 무엇인지 서술하시오.</p></div>
+                                    </div>
+                                    <div class="testA">
+                                        <input type="text" class="form-control testInput">
+                                    </div>
+                                </div>
+
+                                <hr>
+
+                                <div class="borBox">
+                                    <div class="textQ">
+                                        <div class="test_num bold">4</div>
+                                        <div class="txt_Q"><p class="bold fnt16"><span class="po_C4">[주관식]</span> 창업을 다른 단어로 표현하면 무엇입니까?</p></div>
+                                    </div>
+                                    <div class="testA">
+                                        <input type="text" class="form-control testInput">
+                                    </div>
+                                </div>
+
+                                <hr>
+                                <div class="btnAreaC">
+                                    <button type="button" name="button" class="btn btn-lg btn-blue w130">시험제출</button>
+                                </div>
+
+                            </section>
+
+
+
+
+
+
+
+
+                        </div>
+                    </div>
+                </article>
+            </div>
+            <!--// content -->
+            <footer>
+                <div class="footerWrap">
+                    <section class="footerTop">
+                        <div class="container">
+                            <div class="inner">
+                                <ul>
+                                    <li class="li_bar"><a href="">이용약관</a></li>
+                                    <li class="li_bar"><a href="" class="po_C5 bold">개인정보 처리방침</a></li>
+                                    <li class="li_bar"><a href="">저작권 보호방침</a></li>
+                                    <li class="li_bar"><a href="">이메일주소 무단수집거부</a></li>
+                                    <li class="li_bar"><a href="">찾아오시는 길</a></li>
+                                </ul>
+                                <div class="dropup dropsitelink">
+                                    <button class="btn btn-default dropdown-toggle" type="button" id="dropsiteGo" data-toggle="dropdown" aria-expanded="true">관련사이트바로가기
+                                        <span class="drop_arr_up"></span>
+                                    </button>
+                                    <ul class="dropdown-menu" role="menu" aria-labelledby="dropsiteGo">
+                                        <li role="presentation"><a role="menuitem" tabindex="-1" href="#">관련사이트1</a></li>
+                                        <li role="presentation"><a role="menuitem" tabindex="-1" href="#">관련사이트2</a></li>
+                                        <li role="presentation"><a role="menuitem" tabindex="-1" href="#">관련사이트3</a></li>
+                                        <li role="presentation"><a role="menuitem" tabindex="-1" href="#">관련사이트4</a></li>
+                                        <li role="presentation"><a role="menuitem" tabindex="-1" href="#">관련사이트1</a></li>
+                                        <li role="presentation"><a role="menuitem" tabindex="-1" href="#">관련사이트2</a></li>
+                                        <li role="presentation"><a role="menuitem" tabindex="-1" href="#">관련사이트3</a></li>
+                                        <li role="presentation"><a role="menuitem" tabindex="-1" href="#">관련사이트4</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                        </div>
+                    </section>
+                    <section class="footerBot">
+                        <div class="container">
+                            <ul class="clearfix">
+                                <li class="li_bar">04520 서울시 중구 세종대로 124 프레스센터 4층, 5층</li>
+                                <li class="li_bar">서민금융통합콜센터 1397 (1644-1110, 1544-4005)</li>
+                            </ul>
+                            <p class="copyr">Copyright Since 2016 Korea Inclusive Finance Agency. All Rights Reserved.</p>
+                        </div>
+                    </section>
+                </div>
+            </footer>
+
+            <div class="dimed"></div>
+        </div>
+
+
+
+    </body>
+</html>

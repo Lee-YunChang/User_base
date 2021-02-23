@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="ko">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>서민금융센터</title>
+        <style>
+
+            body,div,dl,dt,dd,ul,li,ol,h1,h2,h3,h4,h6,pre,code,fieldset,legend,textarea,p,blockquote,th,td,input,select,textarea,button{margin:0;padding:0}
+            fieldset,img{border:0 none}
+            blockquotemq,li{list-style:none}
+            blockquote::before, blockquote:after,q::before,q::before,q::after{content:'';content:none}
+            table{width:100%;border-collapse: collapse;}
+            table th,table td{border:1px solid #ccc;padding:10px;font-size: 13px}
+            table th{background: #f1f1f1}
+            body{padding:20px}
+        </style>
+
+    </head>
+    <body>
+        <h1 style="margin-bottom:15px">서민금융센터 fileList</h1>
+        <table>
+            <thead>
+                <tr>
+                    <th style="width:40%">메뉴</th>
+                    <th>파일명</th>
+                    <th>비고</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>main</td>
+                    <td> <a href="main/main.html">main/main.html</a></td>
+                    <td style="color:red">0719수정!!(코드수정많음)</td>
+                </tr>
+                <tr>
+                    <td>강사공간 > 강사공지사항</td>
+                    <td> <a href="temp/layout.html">temp/layout.html</a></td>
+                    <td style="color:red">서브화면 레이아웃참조</td>
+                </tr>
+                <tr>
+                    <td>회원서비스 > 로그인</td>
+                    <td> <a href="A/A-a1-01.html">A/A-a1-01.html</a></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>회원서비스 > 간편로그인</td>
+                    <td> <a href="A/A-a1-02.html">A/A-a1-02.html</a></td>
+                    <td style="color:red">07-24수정!!</td>
+                </tr>
+                <tr>
+                    <td>회원서비스 > 회원가입</td>
+                    <td> <a href="A/A-a2-01.html">A/A-a2-01.html</a></td>
+                    <td>지점레이어팝업(부트스트랩모달)
+                    <p style="color:red">07-21수정!!</p>
+                    <p style="color:red">07-26수정!!(우편번호 form-group에 w20 추가)</p>
+                </td>
+                </tr>
+                <tr>
+                    <td>회원서비스 > 회원가입완료</td>
+                    <td> <a href="A/A-a2-03.html">A/A-a2-03.html</a></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>대출의무교육 > 창업대출</td>
+                    <td> <a href="C/C-c2-01.html">C/C-c2-01.html</a></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>대출의무교육 > 창업대출(수도권)</td>
+                    <td> <a href="C/C-c2-02.html">C/C-c2-02.html</a></td>
+                    <td>카드형목록(가로형)</td>
+                </tr>
+                <tr>
+                    <td>대출의무교육 > 창업대출(수도권)</td>
+                    <td> <a href="C/C-c2-03.html">C/C-c2-3.html</a></td>
+                    <td>카드형목록(가로형)+탭</td>
+                </tr>
+                <tr>
+                    <td>강사공간 > 진행중인특강</td>
+                    <td> <a href="I/I-i1-01.html">I/I-i1-01.html</a></td>
+                    <td>카드형목록</td>
+                </tr>
+                <tr>
+                    <td>강사공간 > 특강신청정보</td>
+                    <td> <a href="I/I-i2-01.html">I/I-i2-01.html</a></td>
+                    <td>카드형목록</td>
+                </tr>
+                <tr>
+                    <td>강사공간 > 강사정보관리</td>
+                    <td> <a href="I/I-i5-04.html">I/I-i5-04.html</a></td>
+                    <td>경력사항입력테이블
+                        <p style="color:red">07-24수정</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td>강사공간 > 특강교육 강의이력</td>
+                    <td> <a href="I/I-i5-06.html">I/I-i5-06.html</a></td>
+                    <td>일반게시판목록
+                        <p style="color:red">07-24수정</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td>강사공간 > 강사정보관리(상세보기)</td>
+                    <td> <a href="I/I-i5-07.html">I/I-i5-07.html</a></td>
+                    <td>상세보기</td>
+                </tr>
+                <tr>
+                    <td>강사공간 > 강사공지사항</td>
+                    <td> <a href="I/I-i4-01.html">I/I-i4-01.html</a></td>
+                    <td>바타입 목록</td>
+                </tr>
+                <tr>
+                    <td>강사공간 > 강사공지사항</td>
+                    <td> <a href="I/I-i4-02.html">I/I-i4-02.html</a></td>
+                    <td>게시판 뷰</td>
+                </tr>
+                <tr>
+                    <td>강사공간 > 강사소통마당</td>
+                    <td> <a href="I/I-i5-08.html">I/I-i5-08.html</a></td>
+                    <td>바타입 목록 </td>
+                </tr>
+                <tr>
+                    <td>강사공간 > 강사소통마당</td>
+                    <td> <a href="I/I-i5-09.html">I/I-i5-09.html</a></td>
+                    <td>게시판 상세 (댓글쓰기)</td>
+                </tr>
+                <tr>
+                    <td>나의공간 > 수강현황</td>
+                    <td> <a href="H/H-h1-01.html">H/H-h1-01.html</a></td>
+                    <td>바타입</td>
+                </tr>
+                <tr>
+                    <td>나의공간 > 신청내역</td>
+                    <td> <a href="H/H-h2-01.html">H/H-h2-01.html</a></td>
+                    <td>카드형목록</td>
+                </tr>
+                <tr>
+                    <td>나의공간 > 신청하기</td>
+                    <td> <a href="H/H-h2-02.html">H/H-h2-02.html</a></td>
+                    <td>신청양식</td>
+                </tr>
+                <tr>
+                    <td>나의공간 > 개인정보관리</td>
+                    <td> <a href="H/H-h3-01.html">H/H-h3-01.html</a></td>
+                    <td>비밀번호입력</td>
+                </tr>
+                <tr>
+                    <td>나의강의실 > 강의실홈</td>
+                    <td> <a href="G/G-g1-01.html">G/G-g1-01.html</a></td>
+                    <td>과정상세</td>
+                </tr>
+                <tr>
+                    <td>나의강의실 > 온라인학습</td>
+                    <td> <a href="G/G-g2-01.html">G/G-g2-01.html</a></td>
+                    <td>목록</td>
+                </tr>
+                <tr>
+                    <td>나의강의실 > 시험</td>
+                    <td> <a href="G/G-g3-01.html">G/G-g3-01.html</a></td>
+                    <td>목록</td>
+                </tr>
+                <tr>
+                    <td>나의강의실 > 시험</td>
+                    <td> <a href="G/G-g3-02.html">G/G-g3-02.html</a></td>
+                    <td>시험보기</td>
+                </tr>
+                <tr>
+                    <td>나의강의실 > 시험</td>
+                    <td> <a href="G/G-g3-03.html">G/G-g3-03.html</a></td>
+                    <td>시험결과</td>
+                </tr>
+                <tr>
+                    <td>나의강의실 > 시험</td>
+                    <td> <a href="G/G-g3-04.html">G/G-g3-04.html</a></td>
+                    <td>시험없음메세지</td>
+                </tr>
+                <tr>
+                    <td>나의강의실 > 설문</td>
+                    <td> <a href="G/G-g4-01.html">G/G-g4-01.html</a></td>
+                    <td>카드형목록</td>
+                </tr>
+                <tr>
+                    <td>나의강의실 > 설문</td>
+                    <td> <a href="G/G-g4-02.html">G/G-g4-02.html</a></td>
+                    <td>설문하기</td>
+                </tr>
+                <tr>
+                    <td>회원서비스 > ID/PW찾기</td>
+                    <td> <a href="A/A-a3-01.html">A/A-a3-01.html</a></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>회원서비스 > ID/PW찾기</td>
+                    <td> <a href="A/A-a3-02.html">A/A-a3-02.html</a></td>
+                    <td>비밀번호찾기탭</td>
+                </tr>
+                <tr>
+                    <td>강사공간 > 강사정보관리 > 정보관리</td>
+                    <td> <a href="I/I-i5-01.html">I/I-i5-01.html</a></td>
+                    <td>일반테이블뷰</td>
+                </tr>
+                <tr>
+                    <td>강사공간 > 강사정보관리 > 정보관리</td>
+                    <td> <a href="I/I-i5-02.html">I/I-i5-02.html</a></td>
+                    <td>인풋박스 입력</td>
+                </tr>
+                <tr>
+                    <td>강사공간 > 강사정보관리 > 경력관리</td>
+                    <td> <a href="I/I-i5-03.html">I/I-i5-03.html</a></td>
+                    <td>일반테이블뷰</td>
+                </tr>
+                <tr>
+                    <td>강사공간 > 강사정보관리 > 정규교육 강의이력</td>
+                    <td> <a href="I/I-i5-05.html">I/I-i5-05.html</a></td>
+                    <td>일반게시판 목록</td>
+                </tr>
+                <tr>
+                    <td>안내공간 > 공지사항</td>
+                    <td> <a href="F/F-f1-01.html">F/F-f1-01.html</a></td>
+                    <td> 목록</td>
+                </tr>
+                <tr>
+                    <td>안내공간 > 공지사항</td>
+                    <td> <a href="F/F-f1-02.html">F/F-f1-02.html</a></td>
+                    <td> 상세보기</td>
+                </tr>
+                <tr>
+                    <td>안내공간 > 교육안내</td>
+                    <td> <a href="F/F-f2-01.html">F/F-f2-01.html</a></td>
+                    <td> 목록</td>
+                </tr>
+                <tr>
+                    <td>안내공간 > 교육안내</td>
+                    <td> <a href="F/F-f2-02.html">F/F-f2-02.html</a></td>
+                    <td> 상세보기</td>
+                </tr>
+                <tr>
+                    <td>안내공간 > 자주묻는질문</td>
+                    <td> <a href="F/F-f3-01.html">F/F-f3-01.html</a></td>
+                    <td> 상세보기</td>
+                </tr>
+                <tr>
+                    <td>안내공간 > 교육일정표</td>
+                    <td> <a href="F/F-f4-01.html">F/F-f4-01.html</a></td>
+                    <td> 모바일화면만</td>
+                </tr>
+                <tr>
+                    <td>안내공간 > 금융상식TEST</td>
+                    <td> <a href="F/F-f5-01.html">F/F-f5-01.html</a></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>안내공간 > 금융상식TEST</td>
+                    <td> <a href="F/F-f5-02.html">F/F-f5-02.html</a></td>
+                    <td>테스트결과</td>
+                </tr>
+                <tr>
+                    <td>나의강의실 > 공지사항</td>
+                    <td> <a href="G/G-g5-01.html">G/G-g5-01.html</a></td>
+                    <td>목록</td>
+                </tr>
+                <tr>
+                    <td>나의강의실 > 공지사항</td>
+                    <td> <a href="G/G-g5-01_1.html">G/G-g5-01_1.html</a></td>
+                    <td>댓글없는 목록</td>
+                </tr>
+                <tr>
+                    <td>나의강의실 > 공지사항</td>
+                    <td> <a href="G/G-g5-02.html">G/G-g5-02.html</a></td>
+                    <td>상세</td>
+                </tr>
+                <tr>
+                    <td>나의공간 > 개인정보관리</td>
+                    <td> <a href="H/H-h3-02.html">H/H-h3-02.html</a></td>
+                    <td>개인정보수정
+                        <p style="color:red">07-26수정!!(우편번호 form-group에 w20 추가)</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td>온라인교육 > 소개</td>
+                    <td> <a href="C/C-c1-01.html">C/C-c1-01.html</a></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>집합교육 > 소개</td>
+                    <td> <a href="D/D-d1-01.html">D/D-d1-01.html</a></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>방문교육 > 소개</td>
+                    <td> <a href="E/E-e1-01.html">E/E-e1-01.html</a></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>교육포털 > 오시는길</td>
+                    <td> <a href="B/B-b2-01.html">B/B-b2-01.html</a></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>나의공간 > 개인정보관리</td>
+                    <td> <a href="H/H-h3-03.html">H/H-h3-03.html</a></td>
+                    <td>회원탈퇴
+                    </td>
+                </tr>
+                <tr>
+                    <td>기타 > 에러</td>
+                    <td> <a href="K/K-k1-01.html">K/K-k1-01.html</a></td>
+                    <td>
+                    </td>
+                </tr>
+                <tr>
+                    <td>이용안내 > 사이트맵</td>
+                    <td> <a href="K/K-k4-01.html">K/K-k1-01.html</a></td>
+                    <td>
+                    </td>
+                </tr>
+
+            </tbody>
+        </table>
+    </body>
+</html>

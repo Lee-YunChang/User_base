@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="ko">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>종사자교육</title>
+        <link rel="stylesheet" href="../../common/css/style.css">
+        <link rel="stylesheet" href="../../common/fonts/font.css">
+        <link rel="stylesheet" href="../../common/css/bootstrap_jy.css">
+        <script type="text/javascript" src="http://code.jquery.com/jquery-3.2.1.min.js"></script>
+        <script type="text/javascript" src="../../common/js/jquery.bxslider.min.js"></script>
+        <script type="text/javascript" src="../../common/js/bootstrap.min.js"></script>
+        <script type="text/javascript" src="../../common/js/ui.js"></script>
+        <!-- <script type="text/javascript" src="../../common/js/jquery.simple-sidebar.min.js"></script> -->
+        <script type="text/javascript" src="../../common/js/ui.js"></script>
+
+    </head>
+    <body>
+        <a href="#Subcontent" class="sr-only sr-only-focusable">콘텐츠로 바로가기</a>
+        <div id="Wrapper">
+            <header>
+                <div class="semin_header">
+                    <!-- Navigation -->
+                    <nav class="navbar navbar-default" role="navigation">
+                        <!-- Brand and toggle get grouped for better mobile display -->
+                        <div class="globalWrap clearfix">
+                            <div class="container center-block">
+                            <a class="navbar-brand" href="#"><div class="logo"><span class="text-hide">서민금융진흥원</span></div></a>
+
+                                <div class="navbar-header">
+                                    <div class="nav navbar-right top-nav">
+                                        <!--login
+                                        <span class="top_global">
+                                            <a href="#" class="a_join">회원가입</a>
+                                            <a href="#" class="a_idpw">id/pw 찾기</a>
+                                        </span>
+
+                                        <a href="" class="btn_login"><span>로그인</span></a>
+                                        <!-- //login-->
+                                        <!-- logout-->
+                                        <span class="top_global">
+                                            <a href="#" class="a_lecture">강사공간</a>
+                                            <a href="#" class="a_mypage">나의공간</a>
+                                        </span>
+
+                                        <a href="" class="btn_login Out"><span>로그아웃</span></a>
+                                        <!-- //logout-->
+                                        <a href="" class="btn_sitemap"><span class="text-hide">전체메뉴</span></a>
+                                        <button type="button" class="navbar-toggle" id="btn-sidebar">
+                                            <span class="sr-only">전체메뉴</span>
+                                            <span class="icon-bar"></span>
+                                            <span class="icon-bar"></span>
+                                            <span class="icon-bar"></span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+
+                        <div class="gnbposi">
+                            <div class="seominGnbWrap">
+                                <div class="container center-block">
+                                    <div class="formobile" id="main-sidebar">
+                                        <div class="mGnbTop">
+                                            <span class="mGnb_tit">전체메뉴</span>
+                                        </div>
+
+                                        <ul class="ul_gnb">
+                                            <li>
+                                                <a href="#none" class="a_1dep">교육체계</a>
+                                                <div class="subMnWrap">
+                                                    <ul>
+                                                        <li><a href="" class="a_2dep">교육체계</a></li>
+                                                        <li><a href="" class="a_2dep">교육센터 소개</a></li>
+                                                        <li><a href="" class="a_2dep">오시는 길</a></li>
+                                                    </ul>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <a href="#none" class="a_1dep">교육신청</a>
+                                                <div class="subMnWrap">
+                                                    <ul>
+                                                        <li><a href="" class="a_2dep">금융상담직원교육 소개</a></li>
+                                                        <li><a href="" class="a_2dep">온라인교육</a></li>
+                                                        <li><a href="" class="a_2dep">집합교육</a></li>
+                                                    </ul>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <a href="#none" class="a_1dep">지식공간</a>
+                                                <div class="subMnWrap">
+                                                    <ul>
+                                                        <li><a href="" class="a_2dep">일반교육 소개</a></li>
+                                                        <li><a href="" class="a_2dep">온라인교육</a></li>
+                                                        <li><a href="" class="a_2dep">집합교육</a></li>
+                                                    </ul>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <a href="#none" class="a_1dep">안내공간</a>
+                                                <div class="subMnWrap">
+                                                    <ul>
+                                                        <li><a href="" class="a_2dep">공지사항</a></li>
+                                                        <li><a href="" class="a_2dep">교육안내</a></li>
+                                                        <li><a href="" class="a_2dep">자주묻는 질문</a></li>
+                                                        <li><a href="" class="a_2dep">교육일정표</a></li>
+                                                    </ul>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <a href="#none" class="a_1dep">나의강의실</a>
+                                                <div class="subMnWrap">
+                                                    <ul>
+                                                        <li><a href="" class="a_2dep">강의실 홈</a></li>
+                                                        <li><a href="" class="a_2dep">온라인학습</a></li>
+                                                        <li><a href="" class="a_2dep">시험</a></li>
+                                                        <li><a href="" class="a_2dep">설문</a></li>
+                                                        <li><a href="" class="a_2dep">공지사항</a></li>
+                                                        <li><a href="" class="a_2dep">자료실</a></li>
+                                                    </ul>
+                                                </div>
+                                            </li>
+                                        </ul>
+                                        <button type="button" class="menuClose"><span class="text-hide">전체메뉴닫기</span></button>
+                                    </div>
+
+
+                                </div>
+                            </div>
+                        </div>
+                    </nav>
+                </div>
+
+            </header>
+            <!-- content -->
+            <div class="container" id="Subcontent">
+                <article class="subArea">
+                    <div class="subCntWrap">
+                        <div class="leftMn">
+                            <h1 class="ltTitle">
+                                <span class="bold">종사자교육</span>
+                            </h1>
+                            <nav>
+                                <ul class="leftNavi">
+                                    <li><a href="">상담종사자교육 소개</a></li>
+                                    <li><a href="">사이버교육</a></li>
+                                    <li><a href="" class="active">집합교육</a></li>
+                                </ul>
+                            </nav>
+                        </div>
+                        <div class="subConts">
+                            <section class="contTop">
+                                <div class="path">
+                                    <ul>
+                                        <li><span class="home text-hide">홈</span></li>
+                                        <li>종사자교육</li>
+                                        <li class="active">집합교육</li>
+                                    </ul>
+                                </div>
+                                <h2 class="h2_tit">집합교육</h2>
+                            </section>
+
+                            <section>
+                                <div class="borBoxW3">
+                                    <ul class="li_dash">
+                                        <li class="po_C7 bold fnt15">서민금융진흥원의 온라인교육은 <span class="po_C10">언제 어디서든 이용자 특성을 고려한 맞춤형 콘텐츠를 제공</span>합니다.</li>
+                                    </ul>
+                                    <p class="mrg_l10">※ 온라인 교육을 위하여는 회원가입이 필요하며, 회원가입 후 학습이력 등을 관리할 수 있습니다.</p>
+                                </div>
+                            </section>
+
+                            <hr>
+                            <section>
+                                <h3 class="main_tit">과정소개</h3>
+                                <div class="tblWrap">
+                                    <table class="dataTbl text-center">
+                                        <caption>과정소개(과목,교육목적,주요내용)</caption>
+                                        <colgroup>
+                                            <col style="width:25%">
+                                            <col style="width:30%">
+                                        </colgroup>
+                                        <thead>
+                                            <tr>
+                                                <th scope="col">과목</th>
+                                                <th scope="col">교육목적</th>
+                                                <th scope="col">주요내용</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>
+                                                    <span>대출이용자 교육</span>
+                                                </td>
+                                                <td>
+                                                    <span>대출자금의 원활한 활용과<br>금융역량 강화를 통한 연체 예방</span>
+                                                </td>
+                                                <td>
+                                                    <ul class="mrg_t5 mrg_b5">
+                                                        <li><div class="ico_link"><a href="">창업</a></div></li>
+                                                        <li><div class="ico_link"><a href="">사업운영</a></div></li>
+                                                        <li><div class="ico_link"><a href="">대학생&middot;청년 햇살론</a></div></li>
+                                                        <li><div class="ico_link"><a href="">기타 서민금융이용자</a></div></li>
+                                                    </ul>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <span>상담직원 교육</span>
+                                                </td>
+                                                <td>
+                                                    <span>서민 및 취약계층의 접점에<br>있는 직원들의 역량향상</span>
+                                                </td>
+                                                <td>
+                                                    <ul>
+                                                        <li><div class="ico_link"><a href="">서민금융기관 종사자</a></div></li>
+                                                        <li><div class="ico_link"><a href="">기타 기관 종사자</a></div></li>
+                                                    </ul>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <span>금융소비자 교육</span>
+                                                </td>
+                                                <td>
+                                                    <span>금융 이해력 제고를 통한 적절한<br>의사결정을 할 수 있도록 지원</span>
+                                                </td>
+                                                <td>
+                                                    <ul>
+                                                        <li><div class="ico_link"><a href="">금융</a></div></li>
+                                                        <li><div class="ico_link"><a href="">창업</a></div></li>
+                                                        <li><div class="ico_link"><a href="">취업</a></div></li>
+                                                        <li><div class="ico_link"><a href="">생활법률&middot;생활복지</a></div></li>
+                                                    </ul>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </section>
+
+                            <hr>
+
+                            <section>
+                                <h3 class="main_tit">진행과정</h3>
+                                <div class="prgStep">
+                                    <ul class="step6">
+                                        <li>
+                                            <dl class="step01">
+                                                <dt><div>회원가입</div></dt>
+                                                <dd>
+                                                    <span class="stepTxt">수료증발급, 이력관리를 위한회원가입</span>
+                                                    <div class="stepArr"><span class="sr-only">다음</span></div>
+                                                </dd>
+                                            </dl>
+
+                                        </li>
+                                        <li>
+                                            <dl class="step02">
+                                                <dt><div>사전테스트</div></dt>
+                                                <dd>
+                                                    <span class="stepTxt">본인의 수준 평가를 위한 사전테스트</span>
+                                                    <div class="stepArr"><span class="sr-only">다음</span></div>
+                                                </dd>
+                                            </dl>
+                                        </li>
+                                        <li>
+                                            <dl class="step03">
+                                                <dt><div>학습</div></dt>
+                                                <dd>
+                                                    <span class="stepTxt">과정별 학습</span>
+                                                    <div class="stepArr"><span class="sr-only">다음</span></div>
+                                                </dd>
+                                            </dl>
+                                        </li>
+                                        <li>
+                                            <dl class="step04">
+                                                <dt><div>평가 및 결과</div></dt>
+                                                <dd>
+                                                    <span class="stepTxt">학습 완료 후 평가 응시 및 점수 확인</span>
+                                                    <div class="stepArr"><span class="sr-only">다음</span></div>
+                                                </dd>
+                                            </dl>
+                                        </li>
+                                        <li>
+                                            <dl class="step05">
+                                                <dt><div>수료증 발급</div></dt>
+                                                <dd>
+                                                    <span class="stepTxt">수료증 출력 (단, 수료기준 충족 시)</span>
+                                                    <div class="stepArr"><span class="sr-only">다음</span></div>
+                                                </dd>
+                                            </dl>
+                                        </li>
+                                        <li>
+                                            <dl class="step06">
+                                                <dt><div>이력관리</div></dt>
+                                                <dd>
+                                                    <span class="stepTxt">학습 및 평가 내역 확인</span>
+                                                </dd>
+                                            </dl>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </section>
+
+
+
+
+                        </div>
+                    </div>
+                </article>
+            </div>
+            <!--// content -->
+            <footer>
+                <div class="footerWrap">
+                    <section class="footerTop">
+                        <div class="container">
+                            <div class="inner">
+                                <ul>
+                                    <li class="li_bar"><a href="">이용약관</a></li>
+                                    <li class="li_bar"><a href="" class="po_C5 bold">개인정보 처리방침</a></li>
+                                    <li class="li_bar"><a href="">저작권 보호방침</a></li>
+                                    <li class="li_bar"><a href="">이메일주소 무단수집거부</a></li>
+                                </ul>
+                                <div class="dropup dropsitelink">
+                                    <button class="btn btn-default dropdown-toggle" type="button" id="dropsiteGo" data-toggle="dropdown" aria-expanded="true">관련사이트바로가기
+                                        <span class="drop_arr_up"></span>
+                                    </button>
+                                    <ul class="dropdown-menu" role="menu" aria-labelledby="dropsiteGo">
+                                        <li role="presentation"><a role="menuitem" tabindex="-1" href="#">관련사이트1</a></li>
+                                        <li role="presentation"><a role="menuitem" tabindex="-1" href="#">관련사이트2</a></li>
+                                        <li role="presentation"><a role="menuitem" tabindex="-1" href="#">관련사이트3</a></li>
+                                        <li role="presentation"><a role="menuitem" tabindex="-1" href="#">관련사이트4</a></li>
+                                        <li role="presentation"><a role="menuitem" tabindex="-1" href="#">관련사이트1</a></li>
+                                        <li role="presentation"><a role="menuitem" tabindex="-1" href="#">관련사이트2</a></li>
+                                        <li role="presentation"><a role="menuitem" tabindex="-1" href="#">관련사이트3</a></li>
+                                        <li role="presentation"><a role="menuitem" tabindex="-1" href="#">관련사이트4</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                        </div>
+                    </section>
+                    <section class="footerBot">
+                        <div class="container">
+                            <ul class="clearfix">
+                                <li class="li_bar">04520 서울시 중구 세종대로 124 프레스센터 4층, 5층</li>
+                                <li class="li_bar">서민금융통합콜센터 1397 (1644-1110, 1544-4005)</li>
+                            </ul>
+                            <p class="copyr">Copyright Since 2016 Korea Inclusive Finance Agency. All Rights Reserved.</p>
+                        </div>
+                    </section>
+                </div>
+            </footer>
+
+            <div class="dimed"></div>
+        </div>
+
+
+
+    </body>
+</html>

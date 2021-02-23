@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 클래스데스크 > 강사 > 진도학습관련 -->
+<mapper namespace="com.webapp.classdesk.mapper.ClassdeskTutorProgressMapper">
+
+	<select id="getEdCourseTreeList" parameterType="dmap" resultType="emap">
+        SELECT 
+            TREENO, 
+            COURSENO, 
+            SDAY, 
+            SUBJECT, 
+            SUBCNT,
+            FRAMECNT,
+            RUNTIME,
+            FILE_PATH,
+            TREE_FILE_PATH,
+            START_FILE,
+            (
+              SELECT NVL(ROUND (( AVG(A.FRAMESEQ) /X.FRAMECNT) *100 ,2) ,0)
+                FROM TB_LE_TREE_HIST A
+                     LEFT OUTER JOIN TB_LE_COURSE_USER B
+                         ON A.CUSERNO = B.CUSERNO
+               WHERE B.CSEQNO = #{SES_CSEQNO}   
+                 AND A.TREENO =X.TREENO
+            ) AS AVG_FRAMSEQ
+            , CON_HEIGHT
+            , CON_WIDTH
+        FROM  TB_ED_COURSE_TREE X
+        WHERE COURSENO = #{SES_COURSENO}
+        ORDER BY SDAY
+	</select>
+	
+	<select id="getConurlInfo" parameterType="dmap" resultType="emap">
+<!-- 		SELECT CONURL FROM TB_ED_COURSE   WHERE COURSENO =  #{SES_COURSENO} -->
+		SELECT A.CONURL, B.SEQ_TITLE 
+		FROM TB_ED_COURSE A ,TB_ED_COURSE_SEQ B 
+		WHERE A.COURSENO = #{SES_COURSENO} 
+		AND B.CSEQNO = #{cseqno} 
+		AND A.COURSENO = B.COURSENO
+	</select>
+</mapper>

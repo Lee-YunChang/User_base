@@ -1,0 +1,700 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.webapp.academy.mapper.UserMapper">
+
+    <!-- 유저번호 최대값+1 호출 -->
+    <select id="getMaxMberNo" resultType="Integer" parameterType="dmap">
+        SELECT SEQ_TB_USERS.NEXTVAL AS MAX_USERNO  FROM DUAL
+    </select>
+
+    <!-- 유저 아이디 중복체크 -->
+    <select id="searchMberId" resultType="emap" parameterType="dmap">
+        SELECT UNITY_ID USERID FROM TB_CT_UNITY_MBER WHERE UNITY_ID = #{userId}
+    </select>
+
+    <!-- 유저 email 중복체크 -->
+    <select id="searchMberEmail" resultType="emap" parameterType="dmap">
+        SELECT UNITY_ID
+        	, MOBLPHON
+        	, EMAIL
+        	, UNITY_MBERNO
+        FROM TB_CT_UNITY_MBER 
+        WHERE EMAIL = #{email}
+        <if test="SES_USERNO != null and SES_USERNO != '' and SES_USERNO > 0">
+        	AND UNITY_MBERNO = #{SES_USERNO}
+        </if>
+        <if test="userName != null and userName != ''"> 
+        	AND MBERNM =  #{userName}
+        </if>
+        AND SECSN_AT = 'N'
+    </select>
+
+    <!-- 유저 email 중복체크 -->
+    <select id="searchMberEmail2" resultType="emap" parameterType="dmap">
+        SELECT UNITY_ID
+        	, MOBLPHON
+        	, EMAIL
+        	, UNITY_MBERNO
+        	, AUTH_MODE
+        FROM TB_CT_UNITY_MBER 
+        WHERE EMAIL = #{email}
+        <if test="SES_USERNO != null and SES_USERNO != '' and SES_USERNO > 0">
+        	AND UNITY_MBERNO = #{SES_USERNO}
+        </if>
+        <if test="userName != null and userName != ''"> 
+        	AND MBERNM =  #{userName}
+        </if>
+        AND SECSN_AT = 'N'
+    </select>
+    
+    <!-- 유저 휴대폰번호 중복체크 -->
+    <select id="searchMberMobile" resultType="emap" parameterType="dmap">
+        SELECT MOBLPHON , UNITY_MBERNO
+        FROM TB_CT_UNITY_MBER 
+        WHERE MOBLPHON = #{mobile} 
+        AND SECSN_AT = 'N'
+        AND AUTH_MODE = 'S'
+    </select>
+
+	<select id="searchMberMobile2" resultType="emap" parameterType="dmap">
+        SELECT MOBLPHON , UNITY_MBERNO
+        FROM TB_CT_UNITY_MBER 
+        WHERE MOBLPHON = #{mobile}
+        AND UNITY_MBERNO = #{SES_USERNO}
+        AND SECSN_AT = 'N' 
+    </select>
+
+	<!-- 중복 회원가입 방지를 위한 조회  -->
+	<select id="getUnityInfo"  resultType="int" parameterType="dmap">
+		SELECT 
+			CASE WHEN COUNT(*) > 0 
+			THEN COUNT(*) 
+			ELSE 0 
+			END
+		FROM TB_CT_UNITY_MBER
+		WHERE 1=1
+		AND SECSN_AT = 'N'
+		<if test="authMode != '' and authMode != null">
+			<if test='authMode == "M"'>
+				AND EMAIL = #{email}
+				AND AUTH_CODE = #{emailAuthCode}
+			</if>
+			<if test='authMode == "S"'>
+				AND MOBLPHON = #{moblphon}
+				AND AUTH_CODE = #{smsAuthCode}
+			</if>
+		</if>
+	</select>
+
+    <!-- 회원가입 TB_CT_UNITY_MBER-->
+    <insert id="insertUnityMber" parameterType="dmap">
+        INSERT INTO TB_CT_UNITY_MBER
+        (
+        	UNITY_MBERNO
+			, MT_GRADE_CODE
+			, UNITY_ID
+			, UNITY_PASSWORD
+			, MBERNM
+			, BRTHDY
+			, SEX
+			<if test="email != null and email != '' ">
+				, EMAIL
+			</if>
+			<if test="moblphon != null and moblphon != '' ">
+				, MOBLPHON
+			</if>
+			, SMS_RECPTN_AT
+			, EMAIL_RECPTN_AT
+			, POSITION_NAME
+			, COMNO
+			, SECSN_AT
+			, REG_AT
+			, RGSDE
+			, AUTH_MODE
+			, MT_OFFICE_CODE
+			, LNM_ZIP
+			, LNM_ADRES1
+			, LNM_ADRES2
+			<if test="authMode != null and authMode !=  '' ">
+				<if test='authMode == "M" or authMode == "S"'>
+					, AUTH_CODE
+				</if>
+				<choose>
+					<when test='memberType == "adult" '>
+						<if test='authMode == "P" or authMode == "C" or authMode == "I" '>
+							, KCB_DI
+							, KCB_AUTH_DATE
+						</if>
+					</when>
+					<otherwise>
+						<if test='authMode == "P" or authMode == "C" or authMode == "I" '>
+							, KCB_AUTH_DATE
+						</if>
+					</otherwise>		
+				</choose>
+			</if>
+		)
+		VALUES (
+			#{userNo}
+			, #{mtGradeCode}
+			, #{userId}
+			, #{userPassword}
+			, #{userName}
+			, #{brthdy}
+			, #{sex}
+			<if test="email != null and email != '' ">
+				, #{email}
+			</if>
+			<if test="moblphon != null and moblphon != '' ">
+				, #{moblphon}
+			</if>
+			, #{smsCheckYn}
+			, #{emailCheckYn}
+			, #{positionName}
+			, #{comNo}
+			, 'N'
+			, 'Y'
+			, SYSDATE
+			, #{authMode}
+			, #{mtOfficeCode}
+			, #{lnmZip}
+			, #{lnmAdres1}
+			, #{lnmAdres2}
+			<if test="authMode != null and authMode !=  '' ">
+				<if test='authMode == "M"'>
+					, #{emailAuthCode}
+				</if>
+				<if test='authMode == "S"'>
+					, #{smsAuthCode}
+				</if>
+				<choose>
+					<when test="memberType == 'adult' ">
+						<if test='authMode == "P" or authMode == "C" or authMode == "I" '>
+							, #{di}
+							, SYSDATE
+						</if>
+					</when>
+					<otherwise>
+						, SYSDATE
+					</otherwise>
+				</choose>
+			</if>
+		)
+    </insert>
+
+    <!-- 회원정보 호출 -->
+    <select id="selectUserInfo" parameterType="dmap" resultType="emap">
+        SELECT A.*
+        FROM
+        	(SELECT
+                UNITY_MBERNO USERNO
+                , UNITY_ID USERID
+                , EMAIL 
+                , UNITY_PASSWORD
+                , MBERNM AS USERNAME
+                , BRTHDY
+                , SUBSTR(BRTHDY,0,4) AS BRTHDY_YEAR
+                , SUBSTR(BRTHDY,5,2) AS BRTHDY_MONTH
+                , SUBSTR(BRTHDY,7,2) AS BRTHDY_DAY
+                , TELNO as TEL
+                , MOBLPHON as MOBILE
+                , MT_GRADE_CODE
+                , DEPT_NAME
+                , POSITION_NAME
+                , MT_JOB_KND_CODE
+                , AUTH_MODE
+                , EMAIL_RECPTN_AT
+                , SEX
+                , MT_OFFICE_CODE
+                , (SELECT MT_SUB_NAME FROM TB_CD_MT_SUB WHERE MT_SUB_CODE = MT_OFFICE_CODE) AS MT_OFFICE_NAME
+                , LNM_ZIP
+				, LNM_ADRES1
+				, LNM_ADRES2
+            FROM TB_CT_UNITY_MBER A
+            WHERE UNITY_MBERNO = #{SES_USERNO}) A
+    </select>
+	
+	<!-- 회원정보 호출 -->
+    <select id="selectUserPwdInfo" parameterType="dmap" resultType="emap">
+   		SELECT UNITY_ID
+   			, MBERNM
+   			, MOBLPHON 
+   		FROM TB_CT_UNITY_MBER 
+   		WHERE SECSN_AT = 'N'
+   			AND UNITY_ID = #{userId}
+   			AND MBERNM = #{userName}
+    </select>
+    
+    <!-- 회원정보 변경 -->
+    <update id="updateUnityInfo" parameterType="dmap">
+        UPDATE TB_CT_UNITY_MBER SET
+            MOBLPHON= #{moblphon}
+            , EMAIL = #{email}
+			, SEX = #{sex}
+			, MT_OFFICE_CODE = #{mtOfficeCode}
+            <if test="newUnityPassword != null and newUnityPassword != ''">
+            , UNITY_PASSWORD = #{newUnityPassword}
+            </if>
+            , UPDDE = SYSDATE
+            , UPDUSR = #{SES_USERID}
+            <if test="brthdy != null and brthdy != ''">
+            	, BRTHDY = #{brthdy}
+            </if>
+            , AUTH_MODE = #{confirmBtn}
+            <choose>
+            	<when test="smsCheckYn != null and smsCheckYn != ''">
+            		, SMS_RECPTN_AT = #{smsCheckYn}
+            	</when>
+            	<otherwise>
+            		, SMS_RECPTN_AT = 'N'
+            	</otherwise>
+            </choose>
+            <choose>
+            	<when test="emailCheckYn != null and emailCheckYn != ''">
+            		, EMAIL_RECPTN_AT = #{emailCheckYn}
+            	</when>
+            	<otherwise>
+            		, EMAIL_RECPTN_AT = 'N'
+            	</otherwise>
+            </choose>
+            <if test="mtGradeCode != null and mtGradeCode != ''">
+            , MT_GRADE_CODE = #{mtGradeCode}
+            </if>
+            , LNM_ZIP = #{lnmZip}
+			, LNM_ADRES1 = #{lnmAdres1}
+			, LNM_ADRES2 = #{lnmAdres2}
+        WHERE UNITY_MBERNO = #{SES_USERNO}
+    </update>
+
+    <!-- 유저 아이디/비밀번호찾기 - 아이디 -->
+    <select id="selectFindId" parameterType="dmap" resultType="emap">
+        SELECT
+            UNITY_ID AS USERID
+            , MBERNM AS  USERNAME
+            , EMAIL
+        FROM TB_CT_UNITY_MBER
+            WHERE 1=1
+            AND MBERNM = #{userName}
+
+            <!-- 비밀번호 찾기시 -->
+            <if test="userId != null and userId != ''">
+                AND UNITY_ID = #{userId}
+                AND AUTH_MODE = 'M'
+                AND EMAIL = #{email}
+            </if>
+
+            <!-- 아이디찾기시 이메일방식 : E / 휴대폰방식 : M -->
+            <if test="searchMode == 'EMAIL'">
+                AND EMAIL = #{email}
+            </if>
+            <if test="searchMode == 'MOBILE'">
+                AND MOBLPHON = #{mobileNumber}
+            </if>
+    </select>
+    
+    <!-- 유저 아이디/비밀번호찾기 - 아이디 -->
+    <select id="selectFindId2" parameterType="dmap" resultType="emap">
+        SELECT
+            UNITY_ID AS USERID
+            , MBERNM AS  USERNAME
+            , EMAIL
+        FROM TB_CT_UNITY_MBER
+            WHERE 1=1
+            AND MBERNM = #{userName}
+
+            <!-- 비밀번호 찾기시 -->
+            <if test="userId != null and userId != ''">
+                AND UNITY_ID = #{userId}
+                AND AUTH_MODE = 'M'
+                AND EMAIL = #{email}
+            </if>
+
+            <!-- 아이디찾기시 이메일방식 : E / 휴대폰방식 : M -->
+            <if test="searchMode == 'EMAIL'">
+                AND EMAIL = #{email}
+            </if>
+            <if test="searchMode == 'MOBILE'">
+                AND MOBLPHON = #{mobileNumber}
+            </if>
+             ORDER BY RGSDE ASC
+    </select>
+
+    <!-- 유저 아이디/비밀번호찾기 - 비밀번호 - 임시비밀번호로 업데이트 -->
+    <update id="updateFindPwd" parameterType="dmap">
+        UPDATE TB_CT_UNITY_MBER SET UNITY_PASSWORD = #{rPwd}
+            WHERE UNITY_ID = #{userId}
+            AND EMAIL = #{email}
+            AND SECSN_AT = 'N'
+    </update>
+    
+    <!-- 회원 탈퇴 -회원데이터 삭제 -->
+    <update id="updateCencelMember" parameterType="dmap">
+        UPDATE TB_CT_UNITY_MBER SET
+            SECSN_AT = 'Y' <!-- 탈퇴여부 -->
+            , MT_SECSN_CODE = #{secsnEtc} <!-- 탈퇴 사유코드 -->
+            , SECSN_DATE = SYSDATE <!-- 탈퇴일 -->
+            , AUTH_MODE=NULL <!-- 인증모드 -->
+            , BIZNO=NULL <!-- 사업자번호 -->
+            , BRTHDY=NULL<!-- 생일 -->
+            , DEPT_NAME=NULL<!-- 부서명 -->
+            , EMAIL=NULL<!-- 이메일 -->
+            , EMAIL_RECPTN_AT=NULL<!-- 메일수신여부 -->
+            , LNM_ADRES1=NULL<!-- 주소1 -->
+            , LNM_ADRES2=NULL<!-- 주소2 -->
+            , LNM_ZIP=NULL<!-- 우편번호 -->
+            , LOGIN_DATE=NULL<!-- 마지막 로그인 날짜시간 -->
+            , MOBLPHON=''<!-- 휴대폰 -->
+            <!--, MT_GRADE_CODE=NULL 회원권한코드 -->
+            , MT_JOB_KND_CODE=NULL<!-- 회원직종구분코드 -->
+            , PASSWORD_PD_ENDDE=NULL<!-- 비밀번호기간종료일 -->
+            , POSITION_NAME=NULL<!-- 직급명 -->
+            , REGISTER=NULL<!-- 등록자 -->
+            , RGSDE=NULL<!-- 등록일 -->
+            , SESSION_ID=NULL<!-- 로그인 세션ID -->
+            , SMS_RECPTN_AT=NULL<!-- SMS 수신여부 -->
+            , TELNO=NULL<!-- 전화번호 -->
+            , UNITY_PASSWORD=NULL<!-- 비밀번호 -->
+            , UPDDE=NULL<!-- 수정일  -->
+            , UPDUSR=NULL<!-- 수정자 -->
+            , COMNO=NULL<!-- 기업일련번호 -->
+            WHERE UNITY_ID = #{SES_USERID}
+            AND  UNITY_MBERNO= #{userNo}
+    </update>
+
+    <!-- 기업정보 호출 -->
+    <select id="selectCompanyInfo" parameterType="dmap" resultType="emap">
+        SELECT
+            COMNO
+            , COMNAME
+            , BIZNO
+            , ZIP
+            , SUBSTR(ZIP,0,3) AS ZIP1
+            , SUBSTR(ZIP,4,5) AS ZIP2
+            , ADDR01
+            , ADDR02
+            , CEO
+            , TEL
+            , FAX
+            , UPJONG_NM
+            , UPTEA_NM
+            , COM_REG_GB
+            , MT_ORG_CODE
+        FROM TB_CT_COMPANY
+        WHERE 1=1
+            AND COMNO = #{comNo}
+            AND USE_AT = 'Y'
+    </select>
+
+    <!-- 기업정보 수정 -->
+    <update id="updateCompanyInfo" parameterType="dmap">
+        UPDATE TB_CT_COMPANY SET
+            COMNAME = #{comName}
+            , CEO = #{ceo}
+            , ZIP = REPLACE(#{zip}, '-', '')
+            , COM_REG_GB = #{comRegGb}
+            , ADDR01 = #{addr01}
+            , ADDR02 = #{addr02}
+            , TEL = #{tel}
+            , UPJONG_NM = #{upjongNm}
+            , UPTEA_NM = #{upteaNm}
+            , MT_ORG_CODE = #{mtOrgCode}
+        WHERE COMNO = #{comNo}
+        AND BIZNO = #{bizNo}
+        AND USE_AT = 'Y'
+    </update>
+
+    <!-- 개인정보보호 > 소속기업변경 >  기업 검색 -->
+    <select id="selectCompanyList" parameterType="dmap" resultType="emap">
+        SELECT
+            COMNO
+            , COMNAME
+            , BIZNO
+            , ZIP
+            , ADDR01
+            , ADDR02
+            , CEO
+            , TEL
+            , FAX
+            , UPTEA_NM AS BIZCND
+            , UPJONG_NM AS INDUTY
+        FROM TB_CT_COMPANY
+        WHERE 1=1
+        AND USE_AT = 'Y'
+
+        <if test="comName != null and comName != ''">
+                AND COMNAME LIKE '%'|| #{comName} ||'%'
+        </if>
+        <if test="bizNo != null and bizNo != ''">
+                AND BIZNO LIKE '%'|| #{bizNo} ||'%'
+        </if>
+    </select>
+
+    <!-- 기업 검색 -->
+    <select id="seachCompanyInfo" parameterType="dmap" resultType="emap">
+        SELECT
+            COMNO
+            , COMNAME
+            , BIZNO
+            , ZIP
+            , ADDR01
+            , ADDR02
+            , CEO
+            , TEL
+            , FAX
+            , UPJONG_NM AS BIZCND
+            , UPTEA_NM AS  INDUTY
+            , COM_REG_GB
+            <!-- , TO_CHAR(COM_REG_DATE, 'YYYY-MM-DD') AS COM_REG_DATE -->
+        FROM TB_CT_COMPANY
+        WHERE 1=1
+        AND USE_AT = 'Y'
+        AND COMNAME LIKE '%'|| #{comName} ||'%'
+
+        AND BIZNO = #{bizNo}
+
+    </select>
+
+    <!-- 회원가입 2단계 기업검색 -->
+    <select id="seachCompanyList" parameterType="dmap" resultType="emap">
+        SELECT
+            COMNO
+            , COMNAME
+            , BIZNO
+            , ZIP
+            , SUBSTR(ZIP,0,3) AS ZIP1
+            , SUBSTR(ZIP,4,5) AS ZIP2
+            , ADDR01
+            , ADDR02
+            , CEO
+            , TEL
+            , FAX
+            , UPJONG_NM AS BIZCND
+            , UPTEA_NM AS  INDUTY
+            , COM_REG_GB
+            <!-- , TO_CHAR(COM_REG_DATE, 'YYYY-MM-DD') AS COM_REG_DATE -->
+            , (SELECT UNITY_ID FROM TB_CT_UNITY_MBER WHERE BIZNO = A.BIZNO AND COMNO = A.COMNO AND MT_GRADE_CODE = 'AA2000' ) AS COMPMNGR
+            , MT_ORG_CODE
+            , (SELECT MT_SUB_NAME FROM TB_CD_MT_SUB WHERE MT_SUB_CODE = A.MT_ORG_CODE) AS MT_ORG_NAME
+            , STATUS_GB
+        FROM TB_CT_COMPANY A
+        WHERE 1=1
+        AND USE_AT = 'Y'
+        AND STATUS_GB = 'Y'
+        AND BIZNO = #{bizNo}
+    </select>
+
+
+    <!-- 기업 수 -->
+    <select id="selectStatusGbYnCnt" parameterType="dmap" resultType="Integer">
+        SELECT COUNT(*) FROM TB_CT_COMPANY
+        WHERE 1=1
+        AND USE_AT = 'Y'
+        AND BIZNO = #{bizNo}
+    </select>
+
+    <!-- 기업검색 -->
+    <select id="seachCompanyInfo2" parameterType="dmap" resultType="emap">
+        SELECT
+            COMNO
+            , COMNAME
+            , BIZNO
+            , ZIP
+            , SUBSTR(ZIP,0,3) AS ZIP1
+            , SUBSTR(ZIP,4,5) AS ZIP2
+            , ADDR01
+            , ADDR02
+            , CEO
+            , TEL
+            , FAX
+            , UPJONG_NM AS BIZCND
+            , UPTEA_NM AS  INDUTY
+            , COM_REG_GB
+            <!-- , TO_CHAR(COM_REG_DATE, 'YYYY-MM-DD') AS COM_REG_DATE -->
+            , (SELECT UNITY_ID FROM TB_CT_UNITY_MBER WHERE BIZNO = A.BIZNO AND COMNO = A.COMNO AND MT_GRADE_CODE = 'AA2000' ) AS COMPMNGR
+            , MT_ORG_CODE
+        FROM TB_CT_COMPANY A 
+        WHERE 1=1
+        AND USE_AT = 'Y'
+        AND BIZNO = #{bizNo}
+        <if test="comNm != null and comNm != ''">
+            AND COMNAME = #{comNm}
+        </if>
+    </select>
+
+    <!-- 회원구분 리스트 셀렉트 -->
+    <select id="selectJobKndCodeList" parameterType="dmap" resultType="emap">
+        SELECT
+            MT_SUB_CODE
+            , MT_SUB_NAME
+        FROM TB_CD_MT_SUB
+        WHERE MT_CODE = #{mtCode}
+        AND USEYN = 'Y'
+        AND REF1 = 'USER'
+        ORDER BY ORDR
+    </select>
+
+    <!-- 기업 등록 -->
+    <insert id="insertCompanyInfo" parameterType="hmap">
+        INSERT INTO TB_CT_COMPANY (
+            COMNO
+            , COMNAME
+            , COM_REG_GB
+            , BIZNO
+            , CEO
+            , ZIP
+            , ADDR01
+            , ADDR02
+            <!-- , COM_REG_DATE -->
+            , TEL
+            , UPTEA_NM
+            , UPJONG_NM
+            , REGDATE
+            , USE_AT
+            , MT_ORG_CODE
+            ) VALUES (
+             (SELECT NVL(MAX(COMNO)+1, 1) AS COMNO FROM TB_CT_COMPANY)
+            , #{comName}
+            , #{comRegGb}
+            , #{bizNo}
+            , #{ceo}
+            , #{zip}
+            , #{addr01}
+            , #{addr02}
+            <!-- , #{comRegDate} -->
+            , #{tel}
+            , #{upteaNm}
+            , #{upjongNm}
+            , SYSDATE
+            , 'Y'
+            , #{mtOrgCode}
+            )
+    </insert>
+
+    <update id="updateCompanyEmpMoveInfo" parameterType="dmap">
+        UPDATE TB_CT_UNITY_MBER SET BIZNO = #{bizNo}, COMNO=#{comNo}, MT_GRADE_CODE =#{mtGradeCode} 
+        WHERE UNITY_ID = #{regUserId}
+    </update>
+
+    <!-- 휴대폰 인증으로 비밀번호찾기/ 회원조회 -->
+    <select id="selectPwdSearchUserInfo" parameterType="dmap" resultType="emap">
+        SELECT /*user.selectPwdSearchUserInfo*/ 
+        	  UNITY_ID
+        	, UNITY_PASSWORD 
+        	, REPLACE(MOBLPHON , '-' , '')AS MOBLPHON
+        	, AUTH_MODE
+        FROM VW_TB_USERS 
+        WHERE MOBLPHON = #{mobile}
+        <if test="userName != null and userName != '' ">
+        	AND MBERNM = #{userName}
+        </if>
+        <if test="nonMembrthdy != null and nonMembrthdy != '' ">
+        	AND BRTHDY = #{nonMembrthdy}
+        </if>
+        <if test="userId != null and userId != ''">
+	        AND UNITY_ID = #{userId}
+        </if>
+        <choose>
+        	<when test="memberYn != null and memberYn != ''">
+        		 AND MBER_GBN = 'USER'
+        	</when>
+        	<otherwise>
+        		 AND MBER_GBN = 'NON'
+        	</otherwise>
+        </choose>
+    </select>
+
+    <!-- 휴대폰 인증으로 비밀번호찾기/ 비밀번호 변경실행 -->
+    <update id="updatePwdPopExec" parameterType="dmap">
+        UPDATE TB_CT_UNITY_MBER SET 
+        	UNITY_PASSWORD = #{newUnityPassword}
+        WHERE UNITY_ID = #{userId}
+        AND MBERNM = #{userName}
+        <if test="mobile != null and mobile != ''">
+        	AND MOBLPHON = #{mobile}
+        </if>
+        <if test="email != null and email != ''">
+        	AND EMAIL = #{email}
+        </if>
+        AND SECSN_AT = 'N'
+    </update>
+
+    <!-- 기업담당자 가입권유메일 하루 500건으로 제한 체크 -->
+    <select id="getEmpMailTodayCnt" resultType="Integer" parameterType="dmap">
+        SELECT
+            COUNT(*) TOTAL
+        FROM TB_SY_MAIL_REC R , TB_SY_MAIL_LOG L
+        WHERE R.MAIL_SEQ = L.MAIL_SEQ
+        AND L.WRITER_USERID  = #{userId}
+        AND TO_CHAR(SEND_DATE, 'YYYYMMDD') = TO_CHAR(SYSDATE, 'YYYYMMDD')
+    </select>
+    
+    <!-- 비회원 유저번호 찾기 -->
+    <select id="selectnmberno" resultType="Integer" parameterType="dmap">
+    	SELECT NVL(MAX(UNITY_MBERNO),0) AS UNITY_MBERNO FROM TB_CT_NONMBER 
+    	WHERE MBERNM = #{userName} 
+    	AND MOBLPHON = #{moblphon}
+    	AND BRTHDY = #{brthdy}
+    </select>
+    
+    <!--수강이력 비회원 -> 회원 변경 -->
+    <update id="updateNmberno" parameterType="dmap">
+    	UPDATE TB_LE_COURSE_USER SET USERNO = #{userNo} 
+    	WHERE USERNO = #{nmberNo}
+    </update>
+    
+    <!-- 비회원 탈퇴여부 변경 -->
+    <update id="updateNmberSecsnAt" parameterType="dmap">
+    	UPDATE TB_CT_NONMBER SET SECSN_AT = 'Y' 
+    	WHERE UNITY_MBERNO = #{nmberNo}
+    </update>
+    
+    <!-- 비회원 ->회원 특강신청 정보 변경 -->
+    <update id="updateLectureUserno" parameterType="dmap">
+    	UPDATE TB_ED_LECTURE SET APPLY_NO = #{userNo} 
+    	WHERE APPLY_NO = #{nmberNo}
+    </update>
+    
+    <!-- 비회원 ->회원 시험 제출정보 변경 -->
+    <update id="updateExamApllyUserno" parameterType="dmap">
+    	UPDATE TB_LE_EXAM_APPLY SET USERNO = #{userNo} 
+    	WHERE USERNO = #{nmberNo}
+    </update>
+    
+    <!-- 회원가입 > 본인인증 > 중복회원가입여부 -->
+    <select id="chkJoinYn" resultType="Integer" parameterType="dmap">
+    	SELECT COUNT(*) 
+		FROM TB_CT_UNITY_MBER
+		WHERE KCB_DI = #{di}
+		AND SECSN_AT = 'N'
+    </select>
+    
+    
+    <!-- 회원가입 > 본인인증 > 중복회원가입여부 -->
+    <select id="chkInfoCompare" resultType="Integer" parameterType="dmap">
+    	SELECT COUNT(*)
+		FROM TB_CT_UNITY_MBER
+		WHERE MBERNM = #{mbernm}
+		AND BRTHDY = #{brthdy}
+		<if test='authMode == "P" '>
+			AND REPLACE(MOBLPHON, '-', '') = #{moblphon}
+		</if>
+		AND SECSN_AT = 'N'
+		AND UNITY_ID = #{userId}
+    </select>
+    
+    <!-- 본인인증 정보로 개인정보 UPDATE -->
+    <update id="mebmerUpdateInfo" parameterType="dmap">
+    	UPDATE TB_CT_UNITY_MBER
+		SET MBERNM = #{mbernm}
+		, BRTHDY = #{brthdy}
+		<if test='authMode == "P" '>
+			, MOBLPHON =  #{moblphon}  
+		</if>
+		, KCB_DI = #{di}
+		, KCB_AUTH_DATE = SYSDATE
+		, AUTH_MODE = #{authMode}
+		WHERE UNITY_ID = #{userId}
+    </update>
+    
+</mapper>

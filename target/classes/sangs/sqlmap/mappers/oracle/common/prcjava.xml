@@ -1,0 +1,754 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- oracle procedure data -->
+<mapper namespace="com.webapp.classdesk.mapper.ConvertJavaToProcedureMapper">
+
+	<!-- 개설과정정보 조회 -->
+	<select id="getPrcNewCourseInfo" parameterType="map" resultType="emap" >
+        SELECT /*prcjava.getPrcNewCourseInfo*/
+			NVL(T1.STUDY_EDATE, SYSDATE) AS STUDY_EDATE,
+			,TO_CHAR(NVL(T1.STUDY_EDATE, SYSDATE),'YYYY') AS EDATE_YEAR
+            ,TO_CHAR(NVL(T1.STUDY_EDATE, SYSDATE),'MM') AS EDATE_MONTH
+            ,TO_CHAR(NVL(T1.STUDY_EDATE, SYSDATE),'DD') AS EDATE_DAY
+			T1.COMP_VAL,
+			T2.COMP_CODE,
+			T2.MT_CTYPE_CODE
+		FROM
+			TB_ED_COURSE_SEQ T1,
+			TB_ED_COURSE T2
+		WHERE
+			T1.COURSENO = T2.COURSENO
+		AND T1.CSEQNO = #{P_CSEQNO}
+	</select>
+
+
+	<!-- 수료코드 일련번호 반환 조회 -->
+	<select id="getPrcCompSeqNicsInfo" parameterType="dmap" resultType="emap" >
+		SELECT /*prcjava.getPrcCompSeqNicsInfo*/ 
+	  		SEQ, SEQ_STR
+		FROM TB_LE_COMP_SEQ
+	    WHERE GUBUN = #{P_GUBUN} 
+	    AND YYYY = #{P_YYYY}
+	    AND COMP_CODE = #{P_COURSE_COMP_CODE}
+	</select>
+
+	<!-- 수료코드 등록 -->
+	<insert id="insertPrcCompSeqNics" parameterType="dmap">
+		INSERT /*prcjava.insertPrcCompSeqNics*/  
+		INTO TB_LE_COMP_SEQ (GUBUN, YYYY, COMP_CODE, SEQ_STR, SEQ, WDATE)
+        VALUES (#{P_GUBUN}, #{P_YYYY} , #{P_COURSE_COMP_CODE}, #{SEQSTR}, #{SEQ}, SYSDATE)
+	</insert>
+
+	<!-- 수료처리대상자 조회 -->
+	<select id="getPrcUsersCompExec" parameterType="map" resultType="emap" >
+	    SELECT /*prcjava.getPrcUsersCompExec*/  
+	   		CUSERNO, FINAL_VAL, TRIM(COMPCODE) AS COMPCODE
+	  	FROM TB_LE_COURSE_USER WHERE CSEQNO = #{P_CSEQNO} AND USEYN = 'Y'
+	</select>
+
+	<!--  -->
+	<update id="updatePrcCompCourseUsers" parameterType="map">
+		 UPDATE /*prcjava.updatePrcCompCourseUsers*/
+		 TB_LE_COURSE_USER 
+		 SET
+              COMPDATE         = #{COMPDATE}
+              ,COMPCODE         = #{COMPCODE}
+              ,MT_COMP_TYPE     = #{MT_COMP_TYPE}
+              ,ISPASS     	   = #{ISPASS}
+              <if test="COMNO != null and COMNO != ''">
+               ,COMNO           = #{COMNO}
+               ,COMNAME           = #{COMNAME}
+               ,DEPT_NAME           = #{DEPT_NAME}
+               ,POSITION_NAME   = #{POSITION_NAME}
+              </if>
+          WHERE CUSERNO = #{CUSERNO}
+	</update>
+	
+
+	<update id="updatePrcCompCourseUsers_back" parameterType="dmap">
+		 UPDATE /*prcjava.updatePrcCompCourseUsers_back*/
+		 TB_LE_COURSE_USER 
+		 SET
+              COMPDATE         = #{COMPDATE},
+              COMPCODE         = #{COMPCODE},
+              MT_COMP_TYPE     = #{MT_COMP_TYPE},
+              ISPASS     	   = #{ISPASS}
+          WHERE CUSERNO = #{CUSERNO}
+	</update>
+
+	<!-- // 개설과정 수료처리 업데이트 (상태:성적산출완료)-->
+	<update id="updatePrcEdCourseSeqForStatCd" parameterType="map">
+        UPDATE /*prcjava.updatePrcEdCourseSeqForStatCd*/ 
+	 	TB_ED_COURSE_SEQ 
+	 	SET
+           MT_CSEQ_STATUS_CODE = #{MT_CSEQ_STATUS_CODE},
+        WHERE CUSERNO = #{CUSERNO} 
+	</update>
+
+	<!-- // 수료번호 갱신호출  - -->
+	<update id="updatePrcCompSeqNics" parameterType="dmap">
+	 	UPDATE /*prcjava.updatePrcCompSeqNics*/ 
+	 	TB_LE_COMP_SEQ
+	 	SET SEQ = #{SEQ},
+	 		SEQ_STR = #{SEQSTR}
+        WHERE GUBUN = #{P_GUBUN}
+        AND COMP_CODE = #{P_COURSE_COMP_CODE} 
+        AND YYYY = #{P_YYYY}
+	</update>
+
+
+	<select id="getPrcVwCtUserInfoByUserno" parameterType="dmap" resultType="emap">
+		SELECT /*prcjava.getPrcVwCtUserInfoByUserno*/
+			COM_DEPT_NAME,
+			COM_POSITION_NAME,
+			COMNO,
+			COMNAME
+		FROM
+			VW_TB_CT_USER
+		WHERE
+			USERNO = #{USERNO}
+	
+	</select>
+
+	<!--  -->
+	 <select id="getPrcCourseTreeCnt" parameterType="map" resultType="int" >
+		SELECT /*prcjava.getPrcCourseTreeCnt*/
+            COUNT(1) AS frameCnt
+        FROM (
+             SELECT
+                SUM (FRAMECNT)  SUM_FCNT
+             FROM TB_ED_COURSE_TREE
+             WHERE COURSENO = #{P_COURSENO}
+        	) A 
+        WHERE SUM_FCNT IN (SELECT SUM(FRAMESEQ) SUM_FSEQ FROM TB_LE_TREE_HIST WHERE CUSERNO = #{P_CUSERNO})
+	</select> 
+	  
+	  
+	<!-- 개설과정정보 및 수료처리 대상자 조회 -->
+	<select id="getPrcNewCourseUsersCompExecInfo" parameterType="map" resultType="emap" >
+		SELECT /*prcjava.getNewCourseUsersCompExecInfo*/
+	        T1.MT_CTYPE_CODE
+	      , TO_CHAR(NVL(T3.ENDDATE, SYSDATE),'YYYY') AS EDATE_YEAR  
+		  , T1.COMP_CODE
+		  , SYSDATE AS STUDY_EDATE
+		  , T2.COMP_VAL
+		  , T3.FINAL_VAL
+		  , T3.USERNO
+		FROM TB_ED_COURSE T1, TB_ED_COURSE_SEQ T2, TB_LE_COURSE_USER T3
+		WHERE T1.COURSENO = T2.COURSENO
+		AND T2.CSEQNO = T3.CSEQNO
+		AND T3.CUSERNO = #{P_CUSERNO}
+   
+   
+	</select>  
+	  
+	  
+	<select id="getPrcReportApplyUsers" parameterType="map" resultType="emap">
+		/*prcjava.getPrcReportApplyUsers*/
+		SELECT
+			NVL(SUM(A.VAL), 0) VAL
+			,A.CUSERNO
+		FROM
+			TB_LE_REPORT_APPLY A,
+			TB_LE_REPORT B
+		WHERE
+			A.REPORTNO = B.REPORTNO
+			AND B.CSEQNO = #{P_CSEQNO}
+			AND B.RESULTYN = 'Y'
+			AND A.OPENYN = 'Y'
+		GROUP BY
+			A.CUSERNO
+	</select>  
+	
+	
+	<select id="getPrcPamentMaxcode" parameterType="map" resultType="int">
+		SELECT 
+			LPAD (NVL (MAX (RNUM) + 1, '1'), '4', '0') AS MAXCODE
+	    FROM (
+	    	SELECT 
+	    		RANK () OVER (PARTITION BY TO_CHAR (WDATE, 'YYYYMMDD') ORDER BY WDATE) RNUM
+        	FROM PM_PAYMENT
+	        WHERE 1 = 1
+	        AND PMNO = #{P_PMNO}
+	        AND TO_CHAR (WDATE, 'YYYYMMDD') = TO_CHAR (SYSDATE, 'YYYYMMDD')
+	        AND MT_PM_BILL_CODE = 'DH0002'
+        )
+	</select>
+	
+	  
+	  
+	<select id="getPrcExamApplyUsers" parameterType="map" resultType="emap">
+		/*prcjava.getPrcExamApplyUsers*/
+		SELECT 
+			NVL(SUM(A.VAL), 0) VAL
+			,A.CUSERNO
+		FROM
+			TB_LE_EXAM_APPLY A,
+			TB_LE_EXAM B
+		WHERE
+			A.EXAMNO = B.EXAMNO
+			AND B.CSEQNO = #{P_CSEQNO}
+			AND B.OPENYN = 'Y'
+			AND B.RESULTYN = 'Y'
+			<if test="P_KEY == 'EXAM_M'"> AND B.EXAM_TYPE = 'M'</if>
+			<if test="P_KEY == 'EXAM_F'"> AND B.EXAM_TYPE = 'F'</if>
+		GROUP BY
+			A.CUSERNO
+	</select>    
+	
+	
+	<update id="updatePrcExamApplyUsers" parameterType="map">
+		/*prcjava.updatePrcExamApplyUsers*/
+		UPDATE  
+			TB_LE_COURSE_USER 
+		SET  
+			<if test="P_KEY == 'REPORT'"> REPORT_VAL = #{VAL} </if> 
+			<if test="P_KEY == 'EXAM_M'"> EXAM_MT_VAL = #{VAL} </if> 
+			<if test="P_KEY == 'EXAM_F'"> EXAM_FINAL_VAL = #{VAL} </if> 
+		 WHERE 
+		 	CUSERNO = #{CUSERNO}
+	</update>
+	
+	
+	
+	<select id="getExamApplyHistList" parameterType="dmap" resultType="emap">
+		SELECT /*prcjava.getExamApplyHistList*/
+			QSEQ,
+			QNO,
+			ITEMSEQ,
+			ANSWER,
+			ROWNUM
+		FROM
+			TB_LE_EXAM_HIST
+		WHERE
+			CUSERNO = #{cuserno}
+			AND EXAMNO = #{examno}
+	
+	</select>
+	
+	<select id="getExamBinderForQuizInfo" parameterType="dmap" resultType="emap">
+		 SELECT /*prcjava.getExamBinderForQuizInfo*/
+			T1.ALLOT,	
+			T1.QTYPE,
+			T1.RCODE,
+			T1.RTEXT
+		FROM
+			TB_LE_EXAM_QUIZ T1
+		WHERE
+			T1.EXAMNO = #{examno}
+			AND T1.QNO = #{qno}
+	</select>
+	
+	
+	<update id="updateExamScore" parameterType="dmap">
+		UPDATE /*prcjava.updateExamScore*/
+			TB_LE_EXAM_HIST
+		SET
+			VAL = #{val},
+			ISRIGHT = #{isright}
+		WHERE
+		CUSERNO = #{cuserno}
+		AND EXAMNO = #{examno}
+		AND QSEQ = #{qseq}
+	</update>
+	
+	<update id="updateExamScoreSum" parameterType="dmap">
+		UPDATE /*prcjava.updateExamScoreSum*/
+			TB_LE_EXAM_APPLY
+		SET
+			VAL = #{val}
+		WHERE
+		CUSERNO = #{cuserno}
+		AND EXAMNO = #{examno}
+	</update>
+	
+	
+	
+	<select id="getExamRandomForQuizInfo" parameterType="dmap" resultType="emap">
+		 SELECT /*prcjava.getExamRandomForQuizInfo*/
+			T2.ALLOT,
+			T1.QTYPE,
+			T1.RCODE,
+			T1.RTEXT
+		FROM
+			TB_ED_EXAM_QUIZ T1,
+			TB_LE_EXAM_SECTION T2
+		WHERE
+			T1.SECNO = T2.SECNO
+			AND T1.COURSENO = #{courseno}
+			T1.EXAMNO = #{examno}
+			AND T1.QNO = #{qno}
+	</select>
+	
+	<select id="getExamSetForQuizInfo" parameterType="dmap" resultType="emap">
+		 SELECT /*prcjava.getExamSetForQuizInfo*/ 
+			T1.ALLOT,
+			T1.QTYPE,
+			T1.RCODE,
+			T1.RTEXT
+		FROM
+			TB_LE_EXAM_SQUIZ T1,
+			TB_LE_EXAM_SET T2,
+			TB_LE_EXAM T3
+		WHERE
+			T1.SETNO = T2.SETNO
+			AND T2.SETNO = T3.SETNO
+			AND T1.COURSENO = #{courseno}
+			AND T3.EXAMNO = #{examno}
+			AND T1.QNO = #{qno}
+	</select>
+	
+	<!-- 취소시스템 수강코드 조회 -->
+	<select id="getPrcCencelPaymentInfo" parameterType="dmap" resultType="emap">
+		 SELECT /*prcjava.getPrcCencelPaymentInfo*/
+			 CUSERNO 
+		 FROM PM_PAYMENT WHERE PAYMENT_UID = #{P_PAYMENT_UID}
+	</select>
+	
+	<!-- 취소시스템 환불/미환불/제외 수정  -->
+	<update id="updatePrcCencelPayment" parameterType="map">
+		UPDATE /*prcjava.updatePrcCencelPayment*/ 
+		PM_PAYMENT 
+		SET
+            MT_PM_STATUS_CODE = #{P_MT_PM_STATUS_CODE},
+            CANCEL_APPDATE = NVL(#{P_CANCEL_APPDATE}, SYSDATE),
+            CANCEL_CMT = NVL(#{P_CANCEL_CMT}, ''),
+            CANCEL_REGDATE = NVL(#{P_CANCEL_REGDATE}, SYSDATE),
+            CANCEL_PRC = NVL(#{P_CANCEL_PRICE}, 0)
+        WHERE PAYMENT_UID = #{P_PAYMENT_UID}
+	</update>
+	
+	<!-- 취소시스템 수강정보 수정 -->
+	<update id="updatePrcCencelPaymentCourseUser" parameterType="map">
+		 UPDATE /*prcjava.updatePrcCencelPaymentCourseUser*/
+		 TB_LE_COURSE_USER 
+		 SET USEYN = 'N' WHERE CUSERNO  = #{CUSERNO}
+	</update>
+	
+	
+	<select id="getExamRanExecSectionList" parameterType="dmap" resultType="emap">
+		SELECT /*prcjava.getExamRanExecSectionList*/ 
+			SECNO,
+			TOTALQNUM,
+			USEYN
+		FROM
+			TB_LE_EXAM_SECTION
+		WHERE
+		EXAMNO = #{examno}
+		AND USEYN = 'Y'
+		AND SECNO > 0 
+	</select>
+	
+	
+	<select id="getExamRanExecQuiz" parameterType="dmap" resultType="int">
+		SELECT /*prcjava.getExamRanExecQuiz*/ 
+			COUNT(*) AS L_QCNT
+		FROM TB_ED_EXAM_QUIZ
+		WHERE COURSENO = P_COURSENO
+		AND SECNO = C.SEC
+		AND C.USEYN = 'Y'
+	</select>
+	
+	<select id="getExamRanExecRQuiz" parameterType="dmap" resultType="int">
+		SELECT /*prcjava.getExamRanExecRQuiz*/ 
+			X.QNO
+		FROM
+			(
+			SELECT
+				 ROWNUM  RNUM, QNO
+			FROM
+				TB_ED_EXAM_QUIZ
+			WHERE
+				USEYN = 'Y'
+				AND COURSENO = #{courseno}
+				AND SECNO = #{secno}
+				AND QNO > 0
+			) X
+		WHERE X.RNUM = #{randNo}
+	</select>
+	
+	<select id="getExamRanExecApplyHist" parameterType="dmap" resultType="int">
+		SELECT /*prcjava.getExamRanExecApplyHist*/ 
+			COUNT(*) AS IDX
+		FROM
+			TB_LE_EXAM_HIST
+		WHERE
+		CUSERNO = #{courseno}
+		AND EXAMNO = #{examno}
+		AND QNO = #{qno}
+	</select>
+	
+	<insert id="insertExamRanExecApplyHist" parameterType="dmap">
+		INSERT INTO /*prcjava.insertExamRanExecExamApplyHist*/  
+		TB_LE_EXAM_HIST (
+			CUSERNO,
+			QSEQ,
+			EXAMNO,
+			QNO
+		)
+		VALUES
+		(
+			#{courseno},
+			#{qseq},
+			#{examno},
+			#{qno}
+		)
+	</insert>
+	
+	<!-- 회원탈퇴처리 -->
+	<update id="updateUserCancel" parameterType="dmap">
+		UPDATE  /*prcjava.updateUserCancel*/  
+		TB_CT_UNITY_MBER 
+		SET
+	          UNITY_PASSWORD = NULL
+	        , BIZNO = NULL
+	        , SECSN_AT = 'Y'
+	        , MBERNM = NULL
+	        , FRGNR_AT = NULL
+	        , BRTHDY = NULL
+	        , MOBLPHON = NULL
+	        , TELNO = NULL
+	        , EMAIL = NULL
+	        , LNM_ZIP = NULL
+	        , LNM_ADRES1 = NULL
+	        , LNM_ADRES2 = NULL
+	        , EMAIL_RECPTN_AT = NULL
+	        , SMS_RECPTN_AT = NULL
+	        , DEPT_NAME = NULL
+	        , UPDUSR = NULL
+	        , UPDDE = NULL
+	        , REGISTER = NULL
+	        , RGSDE = NULL
+	        , PASSWORD_PD_ENDDE = NULL
+	        , EXTRL_PROVD_AT = NULL
+	        , TRTMNTCNSGN_AT = NULL
+	        , EXTRL_PROVDDE = NULL
+	        , TRTMNTCNSGN_DE = NULL
+	        , SESSION_ID = NULL
+	        , LOGIN_DATE = NULL
+	       <!--  , MT_GRADE_CODE = NULL -->
+	        , MT_JOB_KND_CODE = NULL
+	        , MT_SECSN_CODE = #{mtCancelCode}
+	        , SECSN_DATE = SYSDATE
+	        , POSITION_NAME = NULL
+	    WHERE UNITY_MBERNO = #{userno}
+	</update>
+	
+	<!-- 강사회원탈퇴처리 -->
+	<update id="updateTutorCancel" parameterType="dmap">
+		UPDATE /*prcjava.updateTutorCancel*/
+		TB_CT_UNITY_MBER_TUTOR 
+		SET 
+	    	  MT_TUTOR_CODE = NULL
+	        , TUTOR_LEC_PRC = NULL
+	        , TUTOR_ETC_PRC = NULL
+	        , TUTOR_OJT_PRC = NULL
+	    WHERE UNITY_MBERNO = #{userno}
+	</update>
+	
+	
+	<delete id="deleteAllLmsCseqByCseqno" parameterType="dmap">
+	  /*tstP.deleteAllLmsCseqByCseqno*/
+	  /*시험*/ 
+	  DELETE FROM TB_LE_EXAM_HIST WHERE EXAMNO IN (SELECT EXAMNO FROM TB_LE_EXAM WHERE CSEQNO = P_CSEQNO);
+	  DELETE FROM TB_LE_EXAM_APPLY WHERE EXAMNO IN (SELECT EXAMNO FROM TB_LE_EXAM WHERE CSEQNO = P_CSEQNO);
+	  DELETE FROM TB_LE_EXAM_QUIZ WHERE EXAMNO IN (SELECT EXAMNO FROM TB_LE_EXAM WHERE CSEQNO = P_CSEQNO);
+	  DELETE FROM TB_LE_EXAM_SECTION WHERE EXAMNO IN (SELECT EXAMNO FROM TB_LE_EXAM WHERE CSEQNO = P_CSEQNO);
+	  DELETE FROM TB_LE_EXAM WHERE CSEQNO = P_CSEQNO;
+	
+	  /*설문*/
+	  DELETE FROM TB_LE_POLL_HIST WHERE POLLCSEQNO IN (SELECT POLLCSEQNO FROM TB_LE_POLL WHERE CSEQNO = P_CSEQNO);
+	  DELETE FROM TB_LE_POLL_APPLY WHERE POLLCSEQNO IN (SELECT POLLCSEQNO FROM TB_LE_POLL WHERE CSEQNO = P_CSEQNO);
+	  DELETE FROM TB_LE_POLL_QUIZ WHERE POLLCSEQNO IN (SELECT POLLCSEQNO FROM TB_LE_POLL WHERE CSEQNO = P_CSEQNO);
+	  DELETE FROM TB_LE_POLL WHERE CSEQNO = P_CSEQNO;
+	
+	  /*과제*/
+	  DELETE FROM TB_LE_REPORT_APPLY WHERE REPORTNO IN (SELECT REPORTNO FROM TB_LE_REPORT WHERE CSEQNO = P_CSEQNO);
+	  DELETE FROM TB_LE_REPORT WHERE CSEQNO = P_CSEQNO;
+	
+	  /*진도학습*/
+	  DELETE FROM TB_LE_TREE_HIST WHERE CUSERNO IN (SELECT CUSERNO FROM TB_LE_COURSE_USER WHERE CSEQNO = P_CSEQNO);
+	
+	  /*수강정보*/
+	  DELETE FROM TB_LE_COURSE_USER WHERE CSEQNO = P_CSEQNO;
+	
+	  /*개설정보*/
+	  DELETE FROM TB_ED_COURSE_SEQ WHERE CSEQNO = P_CSEQNO;
+	</delete>
+	
+	
+	
+	
+	
+	<select id="getPrcPaymentCountInfo" resultType="emap" parameterType="hmap">
+		SELECT
+			(SELECT NVL(#{P_MT_PM_STATUS_CODE}, 'SE2001') FROM DUAL) AS MT_PM_STATUS_CODE
+			, (SELECT COUNT (*) FROM PM_PAYMENT WHERE PAYMENT_UID = #{P_PAYMENT_UID}) AS PAYMENT_UID_CNT
+			, ( SELECT
+					COUNT(*)
+				FROM PM_PAYMENT
+				WHERE PMNO = #{P_PMNO}
+				AND USERNO = #{P_USERNO}
+				AND MT_PM_TYPE_CODE = #{L_MT_PM_TYPE_CODE}
+				AND MT_PM_STATUS_CODE IN ('SE1001','SE2002')
+			) AS L_PUID_CUSER_CNT
+		FROM DUAL
+	</select>
+	
+	<select id="getPrcCourseSeqInfo" resultType="emap" parameterType="hmap">
+		SELECT OPENTYPE
+	         , EDUDAY
+	         , STUDY_SDATE
+	         , STUDY_EDATE
+	         , SYSDATE AS TODATE
+	         , SYSDATE + EDUDAY -1 AS OP_DATE
+	      FROM TB_ED_COURSE_SEQ
+	     WHERE CSEQNO = #{P_PMNO}
+	</select>
+
+	<!-- TB_COURSE_APPLY_EXEC  -->
+	<update id="updatePrcPamentSE2001" parameterType="hmap">
+		UPDATE PM_PAYMENT /*prcjava.updatePrcPamentSE2001*/
+           SET PAYMENT_PRC = #{P_PAYMENT_PRC}
+             , ETC = #{P_ETC}
+             , MT_PM_STATUS_CODE = #{MT_PM_STATUS_CODE}
+             , MT_PM_TYPE_CODE = #{MT_PM_TYPE_CODE}
+             , MT_PM_PAY_CODE = #{P_MT_PM_PAY_CODE}
+             , PAYMENT_INPUTNAME = #{P_PAYMENT_INPUTNAME}
+             , PAY_ACCNO = #{P_PAY_ACCNO}
+             , PMNO = #{P_PMNO}
+             , PAYMENT_DATE = #{P_PAYMENT_DATE}
+             , MT_PM_BILL_CODE = #{P_MT_PM_BILL_CODE}
+             , PMUID = #{P_PMUID}
+             , PMUSRCD = #{P_PMUSRCD}
+         WHERE PAYMENT_UID = #{P_PAYMENT_UID}
+	</update>
+	
+	
+	<!-- TB_COURSE_APPLY_EXEC  -->
+	<update id="updatePrcCourseUserSE2001" parameterType="hmap">
+		UPDATE TB_LE_COURSE_USER /*prcjava.updatePrcCourseUserSE2001*/
+           SET USEYN = 'S'
+        WHERE CUSERNO = ( SELECT CUSERNO FROM PM_PAYMENT WHERE PAYMENT_UID = #{P_PAYMENT_UID})
+	</update>
+	
+	<!-- 수강신청 -->
+	<insert id="insertPrcCourseUserSE2001" parameterType="hmap">
+		<selectKey keyProperty="SEQ_CUSERNO" resultType="int" order="BEFORE">
+            SELECT NVL (MAX (CUSERNO) + 1, 1) AS CUSERNO  FROM TB_LE_COURSE_USER
+		</selectKey>
+		INSERT /*prcjava.insertPrcCourseUserSE2001*/
+		INTO TB_LE_COURSE_USER
+                 (
+                 CUSERNO
+                , CSEQNO
+                , USERNO
+                , USERID
+                , WDATE
+                , PROGRESS_VAL
+                , EXAM_MT_VAL
+                , EXAM_FINAL_VAL
+                , REPORT_VAL
+                , ATTEND_VAL
+                , USEYN
+                , DEPT_NAME
+                , POSITION_NAME
+                , SEX
+                , MOBLPHON
+				, STARTDATE
+				, ENDDATE
+				, TARGETYN
+           )
+          VALUES (
+          		  #{SEQ_CUSERNO}
+                , #{P_PMNO}
+                , #{P_USERNO}
+                , #{P_USERID}
+                , SYSDATE
+                , 0
+                , 0
+                , 0
+                , 0
+                , 0
+                , 'Y'
+                , #{DEPT_NAME}
+                , #{POSITION_NAME}
+                , #{SEX}
+                , #{MOBLPHON}
+				, TO_TIMESTAMP(#{STARTDATE}, 'yyyy-MM-dd hh24:mi:ss')
+				, TO_TIMESTAMP(#{ENDDATE}, 'yyyy-MM-dd hh24:mi:ss')
+				, 'Y'
+         )
+	</insert>
+	
+	
+	<insert id="insertPrcPamentSE2001" parameterType="hmap">
+		INSERT /*prcjava.insertPrcPamentSE2001*/
+		INTO PM_PAYMENT
+	                (PAYMENT_UID
+	               , USERNO
+	               , PAYMENT_PRC
+	               , ETC
+	               , MT_PM_STATUS_CODE
+	               , MT_PM_TYPE_CODE
+	               , MT_PM_FREE_CODE
+	               , PMNO
+	               , CUSERNO
+	               , WDATE
+	               , MT_PM_PAY_CODE
+	               , PAYMENT_INPUTNAME
+	               , PAY_ACCNO
+	               , MT_PM_BILL_CODE
+	               , PMUID
+	               , PMUSRCD)
+	         VALUES (#{P_PAYMENT_UID}
+	               , #{P_USERNO}
+	               , #{P_PAYMENT_PRC}
+	               , #{P_ETC}
+	               , #{MT_PM_STATUS_CODE}
+	               , #{MT_PM_TYPE_CODE}
+	               , NVL (#{P_MT_PM_FREE_CODE}, 'PTAA00')
+	               , #{P_PMNO}
+	               , #{SEQ_CUSERNO}
+	               , SYSDATE
+	               , #{P_MT_PM_PAY_CODE}
+	               , #{P_PAYMENT_INPUTNAME}
+	               , #{P_PAY_ACCNO}
+	               , #{P_MT_PM_BILL_CODE}
+	               , TRIM (TO_CHAR (SYSDATE, 'yyyymmdd') || '-' || #{P_PMNO} || #{MAXCODE})
+	               , #{P_PMUSRCD}
+	               )
+	
+	</insert>
+	
+	<!-- TB_COURSE_APPLY_EXEC  -->
+	<update id="updatePrcPamentSE2002" parameterType="hmap">
+		UPDATE PM_PAYMENT /*prcjava.updatePrcPamentSE2002*/
+           SET PAYMENT_PRC = #{P_PAYMENT_PRC}
+             , ETC = #{P_ETC}
+             , MT_PM_STATUS_CODE = #{MT_PM_STATUS_CODE}
+             , MT_PM_TYPE_CODE = #{MT_PM_TYPE_CODE}
+             , PMNO = #{P_PMNO}
+             , PAYMENT_INPUTNAME = #{P_PAYMENT_INPUTNAME}
+             , PAYMENT_DATE = TO_CHAR (TO_DATE (#{P_PAYMENT_DATE}, 'YYYY-MM-DD'), 'YYYY-MM-DD')
+             , PGSYS_OID = #{P_PGSYS_OID}
+             , MT_PM_FREE_CODE = #{P_MT_PM_FREE_CODE}
+             , MT_PM_PAY_CODE = #{P_MT_PM_PAY_CODE}
+             , MT_PM_BILL_CODE = #{P_MT_PM_BILL_CODE}
+             , PMUID = #{P_PMUID}
+             , PMUSRCD = #{P_PMUSRCD}
+         WHERE PAYMENT_UID = #{P_PAYMENT_UID}
+	</update>
+	
+	
+	<!-- TB_COURSE_APPLY_EXEC  -->
+	<update id="updatePrcCourseUserSE2002" parameterType="hmap">
+		UPDATE TB_LE_COURSE_USER /*prcjava.updatePrcCourseUserSE2002*/
+           SET USEYN = 'S'
+           	 , STARTDATE = #{STUDY_SDATE} 
+           	 , ENDDATE = #{STUDY_EDATE}
+        WHERE CUSERNO = ( SELECT CUSERNO FROM PM_PAYMENT WHERE PAYMENT_UID = #{P_PAYMENT_UID})
+	</update>
+	
+	<insert id="insertPrcCourseUserSE2002" parameterType="hmap">
+		<selectKey keyProperty="SEQ_CUSERNO" resultType="int" order="BEFORE">
+            SELECT NVL (MAX (CUSERNO), 0) + 1 AS CUSERNO  FROM TB_LE_COURSE_USER
+		</selectKey>
+		INSERT /*prcjava.insertPrcCourseUserSE2002*/
+		INTO TB_LE_COURSE_USER
+                     (
+                    	CUSERNO
+                       , CSEQNO
+                       , USERNO
+                       , WDATE
+                       , PROGRESS_VAL
+                       , EXAM_MT_VAL
+                       , EXAM_FINAL_VAL
+                       , REPORT_VAL
+                       , ATTEND_VAL
+                       , USEYN
+                       , PAYMENT_UID
+                       , STARTDATE
+                       , ENDDATE
+                       , COMNAME
+                       , BIZNO
+                       , DEPT_NAME
+                       , POSITION_NAME
+                       , SEX
+                       , MOBLPHON)
+                 VALUES (
+                 		#{SEQ_CUSERNO}
+                       , #{P_PMNO}
+                       , #{P_USERNO}
+                       , SYSDATE
+                       , 0
+                       , 0
+                       , 0
+                       , 0
+                       , 0
+                       , 'Y'
+                       , #{P_PAYMENT_UID}
+                       , #{STUDY_SDATE}
+                       , #{STUDY_EDATE}
+                       , #{P_COMNAME}
+                       , #{P_BIZNO}
+                       , #{DEPT_NAME}
+                       , #{POSITION_NAME}
+                       , #{SEX}
+                       , #{SES_MOBILE}
+                       , #{MOBLPHON}
+                    )
+	
+	</insert>
+	
+	
+	<insert id="insertPrcPamentSE2002" parameterType="hmap">
+		INSERT /*prcjava.insertPrcPamentSE2002*/
+		INTO PM_PAYMENT
+	                (PAYMENT_UID
+                       , USERNO
+                       , PAYMENT_PRC
+                       , ETC
+                       , MT_PM_STATUS_CODE
+                       , MT_PM_TYPE_CODE
+                       , PMNO
+                       , CUSERNO
+                       , WDATE
+                       , MT_PM_PAY_CODE
+                       , PAYMENT_INPUTNAME
+                       , PAYMENT_DATE
+                       , PGSYS_OID
+                       , MT_PM_FREE_CODE
+                       , MT_PM_BILL_CODE
+                       , PMUID
+                       , PMUSRCD)
+                 VALUES (#{P_PAYMENT_UID}
+                       , #{P_USERNO}
+                       , #{P_PAYMENT_PRC}
+                       , #{P_ETC}
+                       , #{MT_PM_STATUS_CODE}
+                       , #{MT_PM_TYPE_CODE}
+                       , #{P_PMNO}
+                       , #{SEQ_CUSERNO}
+                       , SYSDATE
+                       , #{P_MT_PM_PAY_CODE}
+                       , #{P_PAYMENT_INPUTNAME}
+                       <choose>
+                       	<when test="P_PAYMENT_DATE != null and P_PAYMENT_DATE != ''">
+                       		 , TO_CHAR (TO_DATE (#{P_PAYMENT_DATE}, 'YYYY-MM-DD'), 'YYYY-MM-DD')
+                       	</when>
+                       	<otherwise>
+                       		, TO_CHAR(SYSDATE, 'YYYY-MM-DD')
+                       	</otherwise>
+                       </choose>
+                       , #{P_PGSYS_OID}
+                       , #{P_MT_PM_FREE_CODE}
+                       , #{P_MT_PM_BILL_CODE}
+                       , #{P_PMUID}
+                       , #{P_PMUSRCD}
+	               )
+	
+	</insert>
+	
+</mapper>

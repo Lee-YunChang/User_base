@@ -1,0 +1,4 @@
+@charset "utf-8";
+
+/* less than equal IE9 */
+select {padding:0 0 0 40px;}

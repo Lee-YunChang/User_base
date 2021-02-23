@@ -1,0 +1,351 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 클래스데스크 > 강사 > 설문관련 -->
+<mapper namespace="com.webapp.classdesk.mapper.ClassdeskTutorPollMapper">
+
+
+	<select id="getPollMainList" resultType="emap" parameterType="dmap">
+		SELECT
+			 A.CSEQNO
+			, A.OPENYN
+			, A.POLLCSEQNO
+		FROM TB_LE_POLL A
+		WHERE A.CSEQNO = #{SES_CSEQNO}
+	</select>
+
+
+	<!--  설문 목록  -->
+	<select id="getPollList" resultType="emap" parameterType="dmap">
+		SELECT
+			<!-- ROW_NUMBER() OVER (ORDER BY B.QNO ASC) RNUM -->
+			ROWNUM AS RNUM
+			, A.CSEQNO
+			, A.TITLE
+			, A.SDATE
+			, A.EDATE
+			, A.CNT
+			, A.OPENYN
+			, A.RESULTYN
+			, A.OPENTYPE
+			, B.POLLCSEQNO
+			, B.QNO
+			, B.MT_CPOLL_CODE
+			, (SELECT MT_SUB_NAME INTO RESULT FROM TB_CD_MT_SUB WHERE MT_SUB_CODE = B.MT_CPOLL_CODE)MT_CPOLL_NAME
+			, B.SUBJECT
+			, B.EVALTYPE
+			, B.SUMMARY
+			, B.ITEM01
+			, B.ITEM01_VAL
+			, B.ITEM02
+			, B.ITEM02_VAL
+			, B.ITEM03
+			, B.ITEM03_VAL
+			, B.ITEM04
+			, B.ITEM04_VAL
+			, B.ITEM05
+			, B.ITEM05_VAL
+			, B.USEYN	
+		FROM TB_LE_POLL A, TB_LE_POLL_QUIZ B
+		WHERE A.POLLCSEQNO = B.POLLCSEQNO
+		AND A.CSEQNO = #{SES_CSEQNO}
+		<if test="QU_FLAG != null and QU_FLAG != ''"> AND B.USEYN = 'Y' </if>
+		ORDER BY B.QNO
+	</select>
+
+	<!-- 설문 MAX NO  -->
+	<select id="getMaxPollcSeqNo" parameterType="dmap" resultType="emap">
+		SELECT NVL(MAX(POLLCSEQNO)+1, 1) AS SEQPOLLCSEQNO FROM TB_LE_POLL 
+	</select>
+
+	<!-- 설문 메인 저장 -->
+	<insert id="insertPoll" parameterType="dmap"  >
+		INSERT INTO TB_LE_POLL
+		( 
+			POLLCSEQNO
+			, CSEQNO
+			, TITLE
+			, CNT
+			, OPENYN
+			, RESULTYN
+		)
+		VALUES 
+		(
+			#{pollcSeqNo} 
+			, #{SES_CSEQNO}
+			, #{subject}
+			, #{cnt}
+			, 'N'
+			, #{useYn}
+		)
+	</insert>
+	
+	<!-- 설문 임시저장 / 설문개시 -->
+	<update id="updatePoll" parameterType="dmap">
+		UPDATE TB_LE_POLL
+		SET 
+			TITLE = #{title},
+			SDATE 	  = TO_DATE(#{sdate}, 'yyyy-MM-dd'),
+			EDATE 	  = TO_DATE(#{edate}, 'yyyy-MM-dd'),
+			OPENYN 	  = #{openYn},
+			OPENTYPE  = #{openType}
+		WHERE POLLCSEQNO = #{pollcSeqNo}
+		AND   CSEQNO = #{SES_CSEQNO}
+	</update>
+	
+
+	<select id="selectMstPollCnt" parameterType="dmap" resultType="emap">
+		SELECT (SELECT COUNT(POLLCSEQNO) FROM TB_LE_POLL WHERE CSEQNO = T1.CSEQNO) AS POLL_CNT
+			, POLLCSEQNO 
+		FROM TB_LE_POLL T1
+		WHERE CSEQNO = #{SES_CSEQNO}
+		
+	</select>
+
+	<select id="selectMstPollQuizCnt" parameterType="dmap" resultType="emap">
+		SELECT COUNT(1) AS POLL_QUIZ_CNT FROM TB_LE_POLL_QUIZ
+		WHERE POLLCSEQNO = #{pollcSeqNo}
+	</select>
+
+
+	<!-- 설문 문항 일괄 저장 -->
+	<insert id="insertMstPollQuiz" parameterType="dmap">
+	INSERT INTO TB_LE_POLL_QUIZ (
+		POLLCSEQNO
+		, QNO
+		, MT_CPOLL_CODE
+		, SUBJECT
+		, EVALTYPE
+		, SUMMARY
+		, ITEM01
+		, ITEM01_VAL
+		, ITEM02
+		, ITEM02_VAL
+		, ITEM03
+		, ITEM03_VAL
+		, ITEM04
+		, ITEM04_VAL
+		, ITEM05
+		, ITEM05_VAL
+		, USEYN )
+		
+		SELECT
+			#{pollcSeqNo}
+			, QNO
+			, MT_CPOLL_CODE
+			, SUBJECT
+			, EVALTYPE
+			, SUMMARY
+			, ITEM01
+			, ITEM01_VAL
+			, ITEM02
+			, ITEM02_VAL
+			, ITEM03
+			, ITEM03_VAL
+			, ITEM04
+			, ITEM04_VAL
+			, ITEM05
+			, ITEM05_VAL
+			, USEYN
+		FROM TB_ED_POLLMST_QUIZ
+		WHERE COURSENO = #{SES_COURSENO}
+	</insert>
+
+
+
+	<select id="getPollItem" resultType="emap" parameterType="dmap">
+		SELECT
+			<!-- ROW_NUMBER() OVER (ORDER BY A.POLLCSEQNO DESC) RNUM -->
+			ROWNUM AS RNUM
+			, A.CSEQNO
+			, A.TITLE
+			, A.SDATE
+			, A.EDATE
+			, A.CNT
+			, A.OPENYN
+			, A.RESULTYN
+			, B.POLLCSEQNO
+			, B.QNO
+			, B.MT_CPOLL_CODE
+			, (SELECT MT_SUB_NAME INTO RESULT FROM TB_CD_MT_SUB WHERE MT_SUB_CODE = B.MT_CPOLL_CODE) MT_CPOLL_NAME
+			, B.SUBJECT
+			, B.EVALTYPE
+			, B.SUMMARY
+			, B.ITEM01
+			, B.ITEM01_VAL
+			, B.ITEM02
+			, B.ITEM02_VAL
+			, B.ITEM03
+			, B.ITEM03_VAL
+			, B.ITEM04
+			, B.ITEM04_VAL
+			, B.ITEM05
+			, B.ITEM05_VAL
+			, B.USEYN	
+		FROM TB_LE_POLL A, TB_LE_POLL_QUIZ B
+		WHERE A.POLLCSEQNO = B.POLLCSEQNO
+		AND A.CSEQNO = #{SES_CSEQNO}
+		AND A.POLLCSEQNO = #{pollcSeqNo}
+		AND B.QNO = #{qNo}
+		ORDER BY A.POLLCSEQNO DESC
+	</select>
+	
+		<!-- 설문 문항 저장 -->
+	<insert id="insertPollQuiz" parameterType="dmap">
+		INSERT INTO TB_LE_POLL_QUIZ 
+			(POLLCSEQNO, QNO, MT_CPOLL_CODE, SUBJECT, EVALTYPE, SUMMARY, 
+				ITEM01, ITEM01_VAL, ITEM02, ITEM02_VAL, ITEM03, ITEM03_VAL, ITEM04, ITEM04_VAL, ITEM05, ITEM05_VAL, USEYN)
+		VALUES (
+			#{pollcSeqNo} 
+			, (SELECT NVL(MAX(QNO)+1, 1) FROM TB_LE_POLL_QUIZ WHERE POLLCSEQNO = #{pollcSeqNo})
+			, #{mtCpollCode}
+			, #{subject}
+			, #{evalType}
+			, #{summary}
+			, #{item01}
+			, #{item01Val}
+			, #{item02}
+			, #{item02Val}
+			, #{item03}
+			, #{item03Val}
+			, #{item04}
+			, #{item04Val}
+			, #{item05}
+			, #{item05Val}
+			, #{useYn}
+			)
+	</insert>
+	
+		<!-- 설문 문항 수정 -->
+	<update id="updatePollQuiz" parameterType="dmap"  >
+		UPDATE TB_LE_POLL_QUIZ
+		SET 
+			MT_CPOLL_CODE = #{mtCpollCode},
+			SUBJECT 	  = #{subject},
+			EVALTYPE 	  = #{evalType},
+			SUMMARY 	  = #{summary},
+			ITEM01 	   	  = #{item01},
+			ITEM01_VAL 	  = #{item01Val},
+			ITEM02 		  = #{item02},
+			ITEM02_VAL 	  = #{item02Val},
+			ITEM03 		  = #{item03},
+			ITEM03_VAL 	  = #{item03Val},
+			ITEM04 		  = #{item04},
+			ITEM04_VAL 	  = #{item04Val},
+			ITEM05 		  = #{item05},
+			ITEM05_VAL 	  = #{item05Val},
+			USEYN 		  = #{useYn}
+		WHERE POLLCSEQNO = #{pollcSeqNo}
+		AND   QNO = #{qNo}
+	</update>
+	
+		<!-- 설문 문항 삭제 -->
+	<delete id="deletePollQuiz" parameterType="dmap"  >
+		DELETE FROM TB_LE_POLL_QUIZ
+		WHERE POLLCSEQNO = #{pollcSeqNo}
+		AND   QNO = #{qNo}
+	</delete>
+
+	<!--  설문통계  -->
+	<select id="getPollStatList" resultType="emap" parameterType="dmap">
+		SELECT 
+		     (SELECT COUNT(1) FROM TB_LE_POLL_HIST B, TB_LE_POLL_APPLY C WHERE  B.POLLCSEQNO = A.POLLCSEQNO AND C.POLLCSEQNO = A.POLLCSEQNO AND C.CUSERNO = B.CUSERNO AND C.OPENYN = 'Y' AND B.QNO = A.QNO AND B.ITEMSEQ = '1') AS CNT1
+           ,(SELECT COUNT(1) FROM TB_LE_POLL_HIST B, TB_LE_POLL_APPLY C WHERE  B.POLLCSEQNO = A.POLLCSEQNO AND C.POLLCSEQNO = A.POLLCSEQNO AND C.CUSERNO = B.CUSERNO AND C.OPENYN = 'Y' AND B.QNO = A.QNO AND B.ITEMSEQ = '2') AS CNT2
+           ,(SELECT COUNT(1) FROM TB_LE_POLL_HIST B, TB_LE_POLL_APPLY C WHERE  B.POLLCSEQNO = A.POLLCSEQNO AND C.POLLCSEQNO = B.POLLCSEQNO AND C.CUSERNO = B.CUSERNO AND C.OPENYN = 'Y' AND B.QNO = A.QNO AND B.ITEMSEQ = '3') AS CNT3
+           ,(SELECT COUNT(1) FROM TB_LE_POLL_HIST B, TB_LE_POLL_APPLY C WHERE  B.POLLCSEQNO = A.POLLCSEQNO AND C.POLLCSEQNO = A.POLLCSEQNO AND C.CUSERNO = B.CUSERNO AND C.OPENYN = 'Y' AND B.QNO = A.QNO AND B.ITEMSEQ = '4') AS CNT4
+           ,(SELECT COUNT(1) FROM TB_LE_POLL_HIST B, TB_LE_POLL_APPLY C WHERE  B.POLLCSEQNO = A.POLLCSEQNO AND C.POLLCSEQNO = A.POLLCSEQNO AND C.CUSERNO = B.CUSERNO AND C.OPENYN = 'Y' AND B.QNO = A.QNO AND B.ITEMSEQ = '5') AS CNT5
+           ,(SELECT  DECODE(A.TOTCNT, 0, 0, ROUND(COUNT(1)/A.TOTCNT * 100)) FROM TB_LE_POLL_HIST B, TB_LE_POLL_APPLY C WHERE  B.POLLCSEQNO = A.POLLCSEQNO AND C.POLLCSEQNO = A.POLLCSEQNO AND C.CUSERNO = B.CUSERNO AND C.OPENYN = 'Y' AND B.QNO = A.QNO AND B.ITEMSEQ = '1') AS PERCENT1
+           ,(SELECT  DECODE(A.TOTCNT, 0, 0, ROUND(COUNT(1)/A.TOTCNT * 100)) FROM TB_LE_POLL_HIST B, TB_LE_POLL_APPLY C WHERE  B.POLLCSEQNO = A.POLLCSEQNO AND C.POLLCSEQNO = A.POLLCSEQNO AND C.CUSERNO = B.CUSERNO AND C.OPENYN = 'Y' AND B.QNO = A.QNO AND B.ITEMSEQ = '2') AS PERCENT2
+           ,(SELECT  DECODE(A.TOTCNT, 0, 0, ROUND(COUNT(1)/A.TOTCNT * 100)) FROM TB_LE_POLL_HIST B, TB_LE_POLL_APPLY C WHERE  B.POLLCSEQNO = A.POLLCSEQNO AND C.POLLCSEQNO = A.POLLCSEQNO AND C.CUSERNO = B.CUSERNO AND C.OPENYN = 'Y' AND B.QNO = A.QNO AND B.ITEMSEQ = '3') AS PERCENT3
+           ,(SELECT  DECODE(A.TOTCNT, 0, 0, ROUND(COUNT(1)/A.TOTCNT * 100)) FROM TB_LE_POLL_HIST B, TB_LE_POLL_APPLY C WHERE  B.POLLCSEQNO = A.POLLCSEQNO AND C.POLLCSEQNO = A.POLLCSEQNO AND C.CUSERNO = B.CUSERNO AND C.OPENYN = 'Y' AND B.QNO = A.QNO AND B.ITEMSEQ = '4') AS PERCENT4
+           ,(SELECT  DECODE(A.TOTCNT, 0, 0, ROUND(COUNT(1)/A.TOTCNT * 100)) FROM TB_LE_POLL_HIST B, TB_LE_POLL_APPLY C WHERE  B.POLLCSEQNO = A.POLLCSEQNO AND C.POLLCSEQNO = A.POLLCSEQNO AND C.CUSERNO = B.CUSERNO AND C.OPENYN = 'Y' AND B.QNO = A.QNO AND B.ITEMSEQ = '5') AS PERCENT5
+           , A.*
+		FROM (
+		    SELECT
+		        <!-- ROW_NUMBER() OVER (ORDER BY T2.QNO ASC) RNUM -->
+		        ROWNUM AS RNUM
+		        , (SELECT COUNT(1) FROM TB_LE_POLL_APPLY WHERE  POLLCSEQNO = T1.POLLCSEQNO AND OPENYN = 'Y') TOTCNT
+		        , T1.CSEQNO
+		        , T1.TITLE
+		        , T1.SDATE
+		        , T1.EDATE
+		        , T1.CNT
+		        , T1.OPENYN
+		        , T1.RESULTYN
+		        , T2.POLLCSEQNO
+		        , T2.QNO
+		        , T2.MT_CPOLL_CODE
+		        , (SELECT MT_SUB_NAME INTO RESULT FROM TB_CD_MT_SUB WHERE MT_SUB_CODE = T2.MT_CPOLL_CODE) MT_CPOLL_NAME
+		        , T2.SUBJECT
+		        , T2.EVALTYPE
+		        , T2.SUMMARY
+		        , T2.ITEM01
+		        , T2.ITEM01_VAL
+		        , T2.ITEM02
+		        , T2.ITEM02_VAL
+		        , T2.ITEM03
+		        , T2.ITEM03_VAL
+		        , T2.ITEM04
+		        , T2.ITEM04_VAL
+		        , T2.ITEM05
+		        , T2.ITEM05_VAL
+		        , T2.USEYN    
+		    FROM TB_LE_POLL T1, TB_LE_POLL_QUIZ T2
+		    WHERE T1.POLLCSEQNO = T2.POLLCSEQNO
+		    AND T1.CSEQNO = #{SES_CSEQNO}
+		    AND T2.USEYN = 'Y'
+		    AND T1.OPENYN = 'Y'
+		    
+		    ORDER BY T2.QNO
+		) A 
+	</select>
+	
+	<!-- 설문 주관식 내용 -->
+	<select id="getPollStatEtcList" resultType="emap" parameterType="dmap">
+		SELECT 
+		    <!-- ROW_NUMBER() OVER (ORDER BY B.QNO ASC) RNUM -->
+		    ROWNUM AS RNUM
+		    , ANSWER 
+            , C.QNO
+            , C.SUBJECT
+		FROM TB_LE_POLL_APPLY A, TB_LE_POLL_HIST B , TB_LE_POLL_QUIZ C
+		WHERE A.POLLCSEQNO = B.POLLCSEQNO
+		AND   A.CUSERNO    = B.CUSERNO
+        AND   A.POLLCSEQNO = C.POLLCSEQNO
+        AND   B.QNO        = C.QNO
+		AND   A.POLLCSEQNO = #{pollcSeqNo}
+		AND   B.QNO = #{qNo}
+		ORDER BY B.QNO ASC
+	</select>
+	
+	<select id="getPollcSeqNoInfo" resultType="int" parameterType="dmap">
+	SELECT POLLCSEQNO FROM TB_LE_POLL WHERE CSEQNO = #{SES_CSEQNO}
+	</select>
+	
+	<!-- 주관식답변(설문전체) -->
+	<select id="getPollStatDesList"  resultType="emap" parameterType="dmap">
+		
+		SELECT AA.*, E.MBERNM, E.UNITY_ID              
+		FROM (
+			SELECT 
+	            <!-- ROW_NUMBER() OVER (ORDER BY B.QNO ASC) RNUM -->
+	            ROWNUM AS RNUM
+	            , ANSWER
+	            , C.QNO
+	            , C.SUBJECT
+	            , C.MT_CPOLL_CODE
+	            , D.USERNO
+	        FROM TB_LE_POLL_APPLY A, TB_LE_POLL_HIST B , TB_LE_POLL_QUIZ C, TB_LE_COURSE_USER D 
+	        WHERE A.POLLCSEQNO = B.POLLCSEQNO
+	        AND A.CUSERNO    = B.CUSERNO
+	        AND A.POLLCSEQNO = C.POLLCSEQNO
+	        AND B.CUSERNO = D.CUSERNO 
+	        AND B.QNO        = C.QNO
+	        AND A.POLLCSEQNO = #{pollcSeqNo}
+	        AND C.MT_CPOLL_CODE = #{mtCpollCode}
+	        AND A.OPENYN = 'Y'
+		)  AA 
+		LEFT OUTER  JOIN TB_CT_UNITY_MBER E ON AA.USERNO = E.UNITY_MBERNO 
+	</select>
+ 
+</mapper>

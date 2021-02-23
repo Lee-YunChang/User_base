@@ -1,0 +1,581 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.webapp.academy.mapper.CommonMapper">
+
+    <resultMap id="clobMap" type="emap">
+        <result property="CONTENT" column="CONTENT" jdbcType="CLOB" javaType="java.lang.String"/>
+    </resultMap>
+
+
+	 <resultMap type="hashmap" id="cusorMap"></resultMap>
+
+
+	<!-- 서브메뉴 조회 -->
+    <select id="selectSubMenuList" resultType="hMap" parameterType="java.util.HashMap">
+        <![CDATA[
+            SELECT
+                  T1.MENU_CODE
+                , T1.MENU_NAME
+                , T1.MENU_DIV
+                , T1.LINK
+                , T1.P_MENU_CODE
+                , T1.ORDR
+            FROM TB_CD_MENU T1, TB_CD_MENU_GRADE T2
+            WHERE T1.MENU_CODE = T2.MENU_CODE
+            AND T1.SYS_GB = T2.SYS_GB
+            AND T2.GRADE_CODE = #{menuGradeCode}
+            AND T2.USEYN = 'Y'
+            AND T1.SYS_GB = 'WWW'
+            AND T1.P_MENU_CODE LIKE #{rootMenuCd}||'%'
+            AND T1.MENU_DIV > 1
+            AND T1.USE_STATE = 'Y'
+            ORDER BY T1.ORDR, T1.MENU_DIV
+        ]]>
+    </select>
+
+    <!-- 대메뉴 조회 -->
+    <!-- <select id="selectRootMenuList" resultType="hMap" parameterType="dmap">
+    	<![CDATA[
+            SELECT
+                  T1.MENU_CODE
+                , T1.MENU_NAME
+                , T1.MENU_DIV
+                , T1.LINK
+                , T1.P_MENU_CODE
+                , T1.ORDR
+            FROM TB_CD_MENU T1, TB_CD_MENU_GRADE T2
+            WHERE T1.MENU_CODE = T2.MENU_CODE
+            AND T1.SYS_GB = T2.SYS_GB
+            AND T2.GRADE_CODE = #{menuGradeCode}
+            AND T2.USEYN = 'Y'
+            AND T1.SYS_GB = 'WWW'
+            AND T1.MENU_DIV > 0
+            AND T1.USE_STATE = 'Y'
+            ORDER BY T1.ORDR, T1.MENU_DIV
+        ]]>
+    </select> -->
+    <select id="selectRootMenuList" resultType="hMap" parameterType="dmap">
+        <![CDATA[
+            SELECT AA.*
+                , BB.SUB_CODE
+            FROM (
+                SELECT
+                      T1.MENU_CODE
+                    , T1.MENU_NAME
+                    , NVL(LINK, (SELECT LINK FROM TB_CD_MENU WHERE MENU_CODE LIKE T1.MENU_CODE ||'%' AND USE_STATE='Y' AND LINK IS NOT NULL AND ROWNUM = 1)) DEFAULT_LINK
+                    , T1.ORDR
+                    , T1.P_MENU_CODE
+                FROM TB_CD_MENU T1, TB_CD_MENU_GRADE T2
+                WHERE
+                    T2.GRADE_CODE = #{menuGradeCode} AND T2.USEYN = 'Y' AND T1.SYS_GB = T2.SYS_GB AND T1.MENU_CODE = T2.MENU_CODE AND
+                    T1.SYS_GB = 'WWW' AND T1.MENU_DIV = 1 AND T1.USE_STATE = 'Y' ORDER BY T1.ORDR
+            ) AA
+            LEFT OUTER JOIN (
+                    SELECT 
+                    	ROWNUM AS RNUM
+                        , LINK
+                        , MENU_CODE AS SUB_CODE
+                        , P_MENU_CODE
+                    FROM TB_CD_MENU
+                    WHERE USE_STATE = 'Y'
+                    ORDER BY P_MENU_CODE, ORDR ASC
+            )  BB ON BB.P_MENU_CODE = AA.MENU_CODE AND BB.RNUM=1
+            WHERE 1=1
+            ORDER BY AA.MENU_CODE
+        ]]>
+    </select>
+
+	<!-- 대출과목 리스트 -->
+	<select id="getEduLoanList"  parameterType="dmap" resultType="map">
+		SELECT
+			 EDU_LOAN_SEQ
+			,EDU_LOAN_NAME
+			,DUTY_GBN
+			,DUTY_HOUR
+			,DECODE(DUTY_GBN, 'HOUR', '의무과정수', 'COMP', '의무과정수료(1과정이상)', '')  AS DUTY_GBN_TXT
+			,ETC
+			,TO_CHAR(REGDATE,'yyyy-mm-dd') AS WDATE
+			,REGNO
+			,USE_YN
+		FROM TB_ED_LOAN_MNG
+		ORDER BY EDU_LOAN_SEQ DESC
+	</select>
+
+    <!-- 현재 메뉴 정보 -->
+    <select id="getCurrentMenuInfo" resultType="emap" parameterType="dmap" >
+        SELECT AA.*
+            , BB.SUB_CODE
+        FROM (
+            SELECT LEV, MENU_CODE, MENU_NAME
+                    , P_MENU_CODE, ORDR
+                    <!-- , ROW_NUMBER() OVER(ORDER BY ORDR ASC) RNUM -->
+                    , ROWNUM AS RNUM
+                FROM (
+                    SELECT
+                        LEVEL AS LEV
+                        , MENU_CODE
+                        , MENU_NAME
+                        , P_MENU_CODE
+                        , ORDR
+                    FROM TB_CD_MENU
+                    WHERE USE_STATE = 'Y'
+                    START WITH MENU_CODE = #{rootMenuCd}
+                    CONNECT BY PRIOR MENU_CODE = P_MENU_CODE
+            )
+            WHERE 1=1
+            AND	MENU_CODE = #{rootMenuCd}
+            ORDER BY ORDR ASC
+        ) AA
+        LEFT OUTER JOIN (
+                SELECT
+                	<!--  ROW_NUMBER() OVER(PARTITION BY P_MENU_CODE ORDER BY ORDR ASC) RNUM -->
+                	ROWNUM AS RNUM
+                    , LINK
+                    , MENU_CODE AS SUB_CODE
+                    , P_MENU_CODE
+                FROM TB_CD_MENU
+                WHERE USE_STATE = 'Y'
+                ORDER BY P_MENU_CODE, ORDR ASC
+        )  BB ON BB.P_MENU_CODE = AA.MENU_CODE AND BB.RNUM = 1
+        WHERE AA.RNUM = 1
+    </select>
+
+    <!-- 현재 메뉴 정보 URL로 검색 -->
+    <select id="getSearchMenuInfo" resultType="emap" parameterType="dmap" >
+        SELECT
+             T1.MENU_CODE
+          , T1.MENU_NAME
+          , NVL(LINK, (SELECT LINK FROM TB_CD_MENU WHERE MENU_CODE LIKE T1.MENU_CODE ||'%' AND USE_STATE='Y' AND LINK IS NOT NULL AND ROWNUM = 1)) DEFAULT_LINK
+          , T1.ORDR
+          , T1.P_MENU_CODE
+        FROM TB_CD_MENU T1
+        WHERE LINK = #{url}
+        AND SYS_GB = 'WWW'
+        AND P_MENU_CODE IS NOT NULL
+    </select>
+
+
+    <!--
+        쿼리명 : 우편번호 조회(academy.user.common.getPostcodeList)	사용 안함
+        설명 : 공통 > 우편번호
+
+              수정일			수정자			 수정내용
+        ==============================================================
+        2013-09-04			김민규			생성 / 질의 패턴 수정
+    -->
+      <select id="getPostcodeList" resultType="emap" parameterType="dmap">
+        SELECT *
+          FROM (
+                SELECT POSTCODE
+                       , SIDO ||' '|| GUGUN ||' '|| DONG ||' '|| BUNJI as ADDR
+                       , ROWNUM AS RNUM
+                       , COUNT(1) OVER() TOTALCNT
+                  FROM MT_POSTCODE
+         <choose>
+             <when test="searchWord != null and searchWord != ''">
+                 WHERE SIDO||''||GUGUN||''||DONG||''||BUNJI LIKE '%'|| #{searchWord} ||'%'
+             </when>
+             <otherwise>
+                 WHERE SIDO||''||GUGUN||''||DONG||''||BUNJI = ''
+             </otherwise>
+         </choose>
+                ORDER BY POSTNO
+               )
+        WHERE 1=1
+         <if test="startNo != null and startNo != ''">
+          AND RNUM BETWEEN #{startNo} AND #{endNo}
+         </if>
+    </select>
+    
+    <select id="getCompanyCodeList" resultType="emap" parameterType="dmap">
+    	SELECT RNUM
+			, COMNAME
+			, COMNO
+			, ADDR01, ADDR02
+		FROM 
+		 (
+	    	SELECT ROWNUM AS RNUM 
+				, COMNAME
+				, COMNO
+				, ADDR01, ADDR02
+			FROM TB_CT_COMPANY	
+			WHERE 1=1	
+			<if test="orgName != null and orgName != '' ">
+				AND COMNAME LIKE '%'||#{orgName}||'%'
+			</if>
+			<if test="searchWord != null and searchWord != '' ">
+				AND COMNAME LIKE '%'||#{searchWord}||'%'
+			</if>
+		 )A
+		WHERE RNUM BETWEEN #{startNo} and #{endNo}
+    </select>
+    
+    <select id="getCompanyCodeCount" resultType="int" parameterType="dmap">
+
+    	SELECT COUNT(*) AS TOTALCNT
+		FROM TB_CT_COMPANY	
+		WHERE 1=1	
+		<if test="orgName != null and orgName != '' ">
+			AND COMNAME LIKE '%'||#{orgName}||'%'
+		</if>
+		<if test="searchWord != null and searchWord != '' ">
+			AND COMNAME LIKE '%'||#{searchWord}||'%'
+		</if>
+    </select>
+
+    <!--
+        쿼리명 : 사용자정보 조회(academy.user.common.getUserInfo)
+        설명 : 공통 > 사용자정보
+
+              수정일			수정자			 수정내용
+        ==============================================================
+        2013-09-04			김민규			생성 / 질의 패턴 수정
+    -->
+    <select id="getUserInfo" resultType="emap" parameterType="dmap" >
+         SELECT
+               A.UNITY_MBERNO
+             , A.MBERNM
+             , A.BIZNO
+             , A.BRTHDY
+             , A.EMAIL
+             , A.LNM_ZIP
+             , DECODE(BRTHDY, '' , '' , SUBSTR (BRTHDY, 0, 4) || '년 ' || SUBSTR (BRTHDY, 5, 2) || '월 ' || SUBSTR (BRTHDY, 7, 2) || '일') AS BIRTH_FM
+             , DECODE(A.MOBLPHON, '-', '', A.MOBLPHON) AS MOBLPHON
+             , DECODE(A.TELNO, '--', '', A.TELNO) AS TELNO
+             , SUBSTR (A.LNM_ZIP, 0, 3) AS LNM_ZIP1
+             , SUBSTR (A.LNM_ZIP, 5, 7) AS LNM_ZIP2
+             , A.LNM_ADRES1
+             , A.LNM_ADRES2
+             , A.UNITY_ID
+             , A.UNITY_PASSWORD
+             , A.EMAIL_RECPTN_AT
+             , A.SMS_RECPTN_AT
+             , A.SECSN_AT
+             , A.MT_GRADE_CODE
+             , A.COMNO
+			 , A.DEPT_NAME
+             , A.POSITION_NAME
+             , A.MOBLPHON AS HYPEN_MOBLPHON
+          	 , (SELECT TEL FROM TB_CT_COMPANY WHERE COMNO = DECODE(A.COMNO, NULL, 0, A.COMNO)) AS HYPEN_TEL
+			 , (SELECT STATUS_GB FROM TB_CT_COMPANY WHERE COMNO = DECODE(A.COMNO, NULL, 0, A.COMNO)) AS STATUS_GB
+             , (SELECT ADDR01 FROM TB_CT_COMPANY WHERE COMNO = DECODE(A.COMNO, NULL, 0, A.COMNO)) AS ADDR01
+             , (SELECT ADDR02 FROM TB_CT_COMPANY WHERE COMNO = DECODE(A.COMNO, NULL, 0, A.COMNO)) AS ADDR02
+          FROM TB_CT_UNITY_MBER A
+          WHERE 1=1
+          AND UNITY_MBERNO = #{userNo} 
+    </select>
+
+    <!-- TEST -->
+    <select id="getTestUserInfo" resultType="emap" parameterType="dmap" >
+        SELECT
+               A.USERNO
+             , A.USERNAME
+             , A.USERNAME_EN_FIRST
+             , A.USERNAME_EN_LAST
+             , A.BIRTH_YMD
+             , DECODE(BIRTH_YMD, '' , '' , SUBSTR (BIRTH_YMD, 0, 4) || '년 ' || SUBSTR (BIRTH_YMD, 5, 2) || '월 ' || SUBSTR (BIRTH_YMD, 7, 2) || '일') AS BIRTH_FM
+             , DECODE(A.MOBILE, '--', '', MOBILE) AS MOBILE
+             , DECODE(A.TEL, '--', '', TEL) AS TEL
+             , A.EMAIL
+             , A.POSTCODE
+             , SUBSTR (POSTCODE, 0, 3) AS POSTCODE1
+             , SUBSTR (POSTCODE, 4, 7) AS POSTCODE2
+             , A.ADDR1
+             , A.ADDR2
+             , A.USERID
+             , A.PWD
+             , A.LETTERYN
+             , A.SMSYN
+             , A.CANCEL_YN
+             , A.MT_GRADE_CODE
+             , A.MT_TUTOR_CODE
+             , A.TUTOR_LEC_PRC
+             , A.TUTOR_ETC_PRC
+             , A.TUTOR_OJT_PRC
+          FROM VW_TB_CT_USER A
+          WHERE 1=1
+          AND USERNO BETWEEN #{sno} AND #{eno}
+          ORDER BY USERNO
+    </select>
+
+
+    <!--
+        쿼리명 : 공통코드 조회(academy.user.common.getToSangsCodes)
+        설명 : MT공통코드 조회
+
+              수정일			수정자			 수정내용
+        ==============================================================
+        2013-09-04			김민규			생성 / 질의 패턴 수정
+    -->
+    <select id="getToSangsCodes" resultType="emap" parameterType="string"  useCache="true">
+        SELECT
+            MT_SUB_CODE AS P_KEY
+            , MT_SUB_NAME AS P_VALUE
+            , NUM_CD
+            , ABC_CD
+        FROM TB_CD_MT_SUB
+        WHERE MT_CODE= #{mtCode} AND USEYN ='Y'
+        ORDER BY ORDR, MT_SUB_CODE
+    </select>
+
+
+
+    <select id="getTestUserList" resultType="emap">
+          SELECT
+               C.CUSERNO
+                 ,A.COURSENO
+                 ,B.CSEQNO
+                , C.USERNO
+                , D.USERID
+                , D.USERNAME
+              , A.MT_CTYPE_CODE
+              , GET_MTCODE_NAME(A.MT_CTYPE_CODE) AS MT_CTYPE_NM
+              , B.SEQ_TITLE
+              , B.SEQ
+              , B.STUDY_SDATE
+              , B.STUDY_EDATE
+              , NVL(C.ISPASS, 'N') AS ISPASS
+            FROM TB_ED_COURSE A, TB_ED_COURSE_SEQ B, TB_LE_COURSE_USER C, VW_TB_CT_USER D
+            WHERE A.COURSENO = B.COURSENO
+            AND   B.CSEQNO   = C.CSEQNO
+            AND   C.USERNO   = D.USERNO
+            <!--
+            AND   C.USERNO = 20105
+            -->
+            AND   C.USEYN = 'Y'  <!-- 수강여부 Y -->
+            AND   A.MT_CTYPE_CODE NOT IN ('DAAA02')  <!-- 전문가 과정 아닌 과정들만 추출 -->
+    </select>
+
+
+
+    <!--
+    쿼리명 : 이니시스 결제 데이타 저장 (academy.user.common.insertPmCardData)
+    설명 : 이니시스 결제 데이타 저장한다.
+
+          수정일			수정자			 수정내용
+    ==============================================================
+    2013-10-17			김민규			생성 / 질의 패턴 수정
+    -->
+    <insert id="insertPmCardData" parameterType="dmap">
+    INSERT
+      INTO PM_CARD_DATA
+           (
+                TID
+                ,RESULT_CODE
+                ,RESULT_MSG
+                ,MOID
+                ,APPL_DATE
+                ,APPL_TIME
+                ,APPL_NUM
+                ,PAY_METHOD
+                ,TOP_PRICE
+                ,CARD_NUM
+                ,CARD_CODE
+                ,CARD_BANKCODE
+                ,ACTB_CT_BANKCODE
+                ,CSHR_RESULTCODE
+                ,CSHR_TYPE
+                ,VATB_CT_NUM
+                ,VATB_CT_BANKCODE
+
+           )
+           VALUES
+           (
+               #{tid}
+                ,#{resultCode}
+                ,#{resultMsg}
+                ,#{moid}
+                ,#{applDate}
+                ,#{applTime}
+                ,#{applNum}
+                ,#{payMethod}
+                ,#{topPrice}
+                ,#{cardNum}
+                ,#{cardCode}
+                ,#{cardBankcode}
+                ,#{acctBankcode}
+                ,#{cshrResultcode}
+                ,#{cshrType}
+                ,#{vactNum}
+                ,#{vactBankcode}
+           )
+
+    </insert>
+
+
+    <!-- 이메일 템플릿 사용여부 확인 -->
+    <select id="getEmailTempUseYn" resultType="emap" parameterType="dmap" >
+         SELECT
+            TPLNO
+            ,TPLNAME
+            , USEYN
+            , TPL_UID
+        FROM TB_SY_MAIL_TPL
+            WHERE 1=1
+            AND TPL_UID = #{tplUid}
+    </select>
+
+
+
+    <!-- 이메일 템플릿 호출 -->
+    <select id="getEmailSetInfo" parameterType="emap" resultMap="clobMap">
+         SELECT
+            TPLNO
+            , TPLNAME
+            , CONTENT
+            , DBMS_LOB.SUBSTR(CONTENT,2920)
+        FROM TB_SY_MAIL_TPL
+            WHERE  TPLNO = #{tplNo}
+            AND USEYN = 'Y'
+    </select>
+
+    <!-- 공통코드 조회 -->
+    <select id="selectMtCodeSub" parameterType="dmap" resultType="emap">
+        SELECT MT_SUB_CODE
+            , A.MT_SUB_NAME
+            , A.SUMMARY
+            , A.REF1
+            , A.REF2
+            , A.REF3
+            <if test="mtCode2 != null and mtCode2 != '' ">
+            	, (SELECT MT_SUB_CODE FROM TB_CD_MT_SUB B WHERE B.ABC_CD = A.ABC_CD AND B.MT_CODE = #{mtCode2} AND B.MT_SUB_NAME = A.MT_SUB_NAME) AS MT_SUB_CODE2
+            </if>
+        FROM TB_CD_MT_SUB A
+        WHERE MT_CODE = #{mtCode}
+        AND USEYN = 'Y'
+        <if test="abcCd != null and abcCd != ''">
+        	AND ABC_CD = #{abcCd}
+        </if>
+        <if test="schMtSubName != null and schMtSubName != ''">
+        	AND MT_SUB_NAME LIKE '%' || #{schMtSubName} || '%'
+        </if>
+        <if test="ref1 != null and ref1 != ''">
+        	AND REF1 = #{ref1}
+        </if>
+        <if test="ref2 != null and ref2 != ''">
+        	AND REF2 = #{ref2}
+        </if>
+        <if test="ref3 != null and ref3 != ''">
+        	AND REF3 = #{ref3}
+        </if>
+        ORDER BY ORDR, MT_SUB_CODE
+    </select>
+
+    <!-- 공통코드 조회 - sub -->
+    <select id="selectMtCodeSubInfo" parameterType="dmap" resultType="emap">
+        SELECT
+            MT_SUB_CODE
+            , MT_SUB_NAME
+            , REF1
+            , REF2
+            , REF3
+        FROM TB_CD_MT_SUB
+        WHERE MT_SUB_CODE = #{mtSubCode}
+        AND USEYN = 'Y'
+        ORDER BY ORDR, MT_SUB_CODE
+    </select>
+
+    <!-- 지점 리스트 -->
+    <select id="getOfficeCodeList" resultType="map" parameterType="dmap">
+            SELECT /* common.getOfficeCodeList */
+            	  MT_SUB_CODE AS COMNO
+            	, MT_SUB_NAME AS COMNAME
+            	, CASE WHEN (MT_SUB_NAME = '해당없음') THEN 0
+                    ELSE 1
+                    END AS ODERNO
+            FROM TB_CD_MT_SUB
+			WHERE MT_CODE = #{mtCode}
+			AND USEYN = 'Y'
+            <if test="searchWord != null and searchWord != '' ">
+                AND MT_SUB_NAME LIKE '%'||#{searchWord}||'%'
+            </if>
+            <if test="mtOfficeName != null and mtOfficeName != '' ">
+                AND MT_SUB_NAME LIKE '%'||#{mtOfficeName}||'%'
+            </if>
+            ORDER BY ODERNO ASC,CONVERT(MT_SUB_NAME,'ISO2022-KR')
+    </select> 
+
+    <!-- 20161109 수정 : 관할기관 찾기 리스트 수 -->
+    <select id="getOfficeCodeCount" resultType="int" parameterType="dmap">
+        SELECT COUNT(*) AS TOTALCNT
+        FROM TB_CD_MT_SUB
+		WHERE MT_CODE = #{mtCode}
+		AND USEYN = 'Y'
+        <if test="searchWord != null and searchWord != '' ">
+            AND MT_SUB_NAME LIKE '%'||#{searchWord}||'%'
+        </if>
+        <if test="mtOfficeName != null and mtOfficeName != '' ">
+            AND MT_SUB_NAME LIKE '%'||#{mtOfficeName}||'%'
+        </if>
+    </select>
+    
+    <!-- 공통코드 조회 - sub -->
+    <select id="selectDepthName" parameterType="dmap" resultType="emap">
+        SELECT/*selectDepthName*/
+            MT_SUB_CODE
+            , MT_SUB_NAME
+            , REF1
+            , REF2
+            , REF3
+        FROM TB_CD_MT_SUB
+        WHERE REF1 = #{ref1}
+        AND MT_CODE = #{mtSubCode}
+        AND USEYN = 'Y'
+        AND ROWNUM = 1
+        ORDER BY ORDR, MT_SUB_CODE
+    </select>
+    
+    <select id="selectTabMenu" resultType="emap" parameterType="dmap">
+        SELECT 
+        	MT_SUB_CODE
+        	, MT_SUB_NAME
+        	, ABC_CD
+        	, REF1
+        	, REF2
+        	, REF3 
+        FROM TB_CD_MT_SUB 
+        WHERE REF1 = #{ref1}
+        AND ABC_CD = #{mtCtypeCode}
+        AND USEYN = 'Y'
+        ORDER BY MT_SUB_CODE ASC
+    </select>
+    
+    <select id="getOnEduLoanCnt" resultType="int" parameterType="dmap">
+        SELECT COUNT(*)AS ONLINE_CNT FROM TB_ED_COURSE A, TB_ED_COURSE_SEQ B, TB_LE_COURSE_USER C
+             WHERE A.COURSENO = B.COURSENO
+               AND B.CSEQNO = C.CSEQNO
+               AND C.USERNO = #{SES_USERNO}
+               AND C.USEYN = 'Y'
+               AND B.USEYN = 'Y'      
+               AND (SELECT MT_SUB_NAME FROM TB_CD_MT_SUB WHERE MT_SUB_CODE=A.MT_CTYPE_CODE) = '온라인교육'
+    </select>
+    <select id="getOffEduLoanCnt" resultType="int" parameterType="dmap">
+        SELECT COUNT(*)AS OFFLINE_CNT FROM TB_ED_COURSE A, TB_ED_COURSE_SEQ B, TB_LE_COURSE_USER C
+             WHERE A.COURSENO = B.COURSENO
+               AND B.CSEQNO = C.CSEQNO
+               AND C.USERNO = #{SES_USERNO}
+               AND C.USEYN = 'Y'
+               AND B.USEYN = 'Y'      
+               AND (SELECT MT_SUB_NAME FROM TB_CD_MT_SUB WHERE MT_SUB_CODE=A.MT_CTYPE_CODE) = '집합교육'
+    </select>
+    
+    <!-- 대출상품 별 교육수료정보 -->
+   
+  	<select statementType="CALLABLE" id="getSpLmsUserLoanEduinfo" >
+        {CALL SP_TB_USER_LOAN_EDUINFO (
+        		#{I_LOAN_PRD_GRP}
+        		, #{I_LOAN_PRD_CODE}
+        		, #{I_LOAN_USE_CODE}
+        		, #{I_MBERNM}
+        		, #{I_MOBLPHON}
+        		, #{I_BRTHDY}
+        		, #{I_LOAN_REQ_DAY}
+        		, #{errCode, mode=OUT, jdbcType=INTEGER, javaType=java.lang.Integer, resultMap=cusorMap}
+        		, #{errMsg, mode=OUT, jdbcType=VARCHAR, javaType=java.lang.String, resultMap=cusorMap}
+        		, #{result, mode=OUT, jdbcType=CURSOR, javaType=ResultSet, resultMap=cusorMap}
+        		, #{resultOnList, mode=OUT, jdbcType=CURSOR, javaType=ResultSet, resultMap=cusorMap}
+        		, #{resultOffList, mode=OUT, jdbcType=CURSOR, javaType=ResultSet, resultMap=cusorMap}
+        )}
+    </select>
+</mapper>

@@ -1,0 +1,43 @@
+<!DOCTYPE Html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<!-- <meta name="viewport" content="width=device-width, initial-scale=1">  -->
+<!-- <meta name="viewport" content="width=1000, user-scalable=yes" /> -->
+<meta name="viewport" content="width=device-width, maximum-scale=1.0, user-scalable=yes" />
+
+
+<title>video test</title>
+
+<script type="text/javascript" src="./jwplayer-6/jquery-1.9.1.min.js"></script>
+<!-- <script type="text/javascript" src="./jwplayer-6/jwplayer.html5.js"></script> -->
+<!-- <script type="text/javascript" src="./jwplayer-7.12.2/jwplayer.controls.js"></script> -->
+<!-- <script type="text/javascript" src="https://content.jwplatform.com/libraries/snxE2103.js"></script> -->
+
+
+<script>
+function fullscreen(){
+	if(document.getElementById('video1').requestFullscreen){
+		document.getElementById('video1').requestFullscreen();
+	}else if(document.getElementById('video1').mozRequestFullscreen){
+		document.getElementById('video1').mozRequestFullscreen();
+	}else if(document.getElementById('video1').webkitRequestFullscreen){
+		document.getElementById('video1').webkitRequestFullscreen();
+	}else if(document.getElementById('video1').msRequestFullscreen){
+		document.getElementById('video1').msRequestFullscreen();
+	}
+
+}
+
+</script>
+</head>
+<body>
+<div style="width: 300px;">
+<video id="video1" controls="fullscreen" style="width: 100%">
+<source src="01.mp4">
+</video>
+</div>
+<div style="width:100px;height:30px;"><a href="#" onclick="fullscreen(); return false;">전체화면</a></div>
+</body>
+</html>

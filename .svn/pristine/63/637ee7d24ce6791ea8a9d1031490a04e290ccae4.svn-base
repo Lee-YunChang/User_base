@@ -1,0 +1,31 @@
+@charset "utf-8";
+
+@font-face {
+  font-family:'ng_bold'; font-style:normal; font-weight:700;
+  src:url('../fonts/NanumGothicBold.eot');
+  src:url('../fonts/NanumGothicBold.eot?#iefix') format('embedded-opentype'), url('../fonts/NanumGothicBold.woff') format('woff'), url('../fonts/NanumGothicBold.ttf') format('truetype');
+}
+
+/* 서브 레이어 팝업 */
+  .layer_popup {display:none; width:426px; border:3px solid #151a61; z-index:1000; background: #151a61;
+   position:fixed;_position: absolute; left: 50%; top: 50%;
+  -ms-transform: translate(-50%, -50%);
+  -webkit-transform: translate(-50%, -50%);
+  -moz-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%); -webkit-box-sizing:border-box; -moz-box-sizing:border-box; box-sizing:border-box;
+  }
+
+  .layer-tit {position:relative; background:#151a61;}
+  .layer-tit p { font-size:16px; color:#fff; font-family:'ng_bold'; line-height:35px; padding-left:16px;}
+  .layer_close {position:absolute; top:50%; right:17px; text-indent:-9999px; background:url('../../images/sub/layerclose.png') no-repeat; width:14px; height:14px; margin-top:-8px;}
+  .layer_bg {text-align:center;  padding:125px 0 15px; background:#fff;}
+  .layer_bg p {margin-bottom:27px; font-size:22px; color:#454545; font-family:'ng_bold';}
+  .layer_bg .btn-m {padding:0 15px; font-size:1.154em; min-width:auto; border-radius:2px; line-height:27px; background:none;}
+
+  .layer_bg.bg1 {background:#fff url('../../images/sub/layer_bg1.png') 50% 30px no-repeat;}
+  .layer_bg .id-view {background:#f6fafc; width:260px; height:40px; margin:0 auto 38px;}
+  .layer_bg .id-view p {/* font-size:14px; 2016-11-02 */ font-size:1.231em; line-height:40px; color:#454545;}
+
+  /* btn height:30px */
+  .btn-m {display:inline-block; padding:0 10px; min-width:82px; height:30px; line-height:30px; color:#6b6c6e; font-size:13px; text-align:center; border-radius:3px;  border:1px solid #d2d2d2; font-family:'ng_bold';
+  vertical-align:middle; -webkit-box-sizing:border-box; -moz-box-sizing:border-box; box-sizing:border-box;}

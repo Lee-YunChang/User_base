@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 클래스데스크 > 강사 > 성적관련 -->
+<mapper namespace="com.webapp.classdesk.mapper.ClassdeskTutorResultMapper">
+	
+	<parameterMap id="courseMap" type="map">
+		<parameter property="P_COURSENO" 	javaType="java.lang.Integer" jdbcType="INTEGER" mode="IN" />
+		<parameter property="P_CSEQNO" 		javaType="java.lang.Integer" jdbcType="INTEGER" mode="IN" />
+    	<parameter property="R_RESULT" 		javaType="java.lang.String" jdbcType="VARCHAR" mode="OUT" />
+	</parameterMap>
+
+	<parameterMap id="cuserMap" type="map">
+		<parameter property="P_COURSENO" 	javaType="java.lang.Integer" jdbcType="INTEGER" mode="IN" />
+		<parameter property="P_CSEQNO" 		javaType="java.lang.Integer" jdbcType="INTEGER" mode="IN" />
+		<parameter property="P_CUSERNO" 	javaType="java.lang.Integer" jdbcType="INTEGER" mode="IN" />
+    	<parameter property="R_RESULT" 		javaType="java.lang.String" jdbcType="VARCHAR" mode="OUT" />
+	</parameterMap>
+	
+	<!-- 목록 호출 -->
+	<select id="getLeCourseUSerList" parameterType="dmap" resultType="emap">
+		SELECT 
+			X.*
+			<!-- , RANK() OVER (ORDER BY to_number(FINAL_VAL)  DESC) RANK   -->
+			, TO_CHAR( (FRAMESEQ/FRAMECNT * 100) , '9999.00') PROG    
+            , ISPASS  
+		FROM
+			(
+				SELECT 
+				    A.CUSERNO,
+				   	TO_CHAR( A.PROGRESS_VAL, '9999.00')  PROGRESS_VAL,
+				   	TO_CHAR( A.EXAM_MT_VAL, '9999.00')  EXAM_MT_VAL,
+				   	TO_CHAR( A.EXAM_FINAL_VAL, '9999.00')  EXAM_FINAL_VAL,
+				   	TO_CHAR( A.REPORT_VAL, '9999.00')  REPORT_VAL,
+				   	TO_CHAR( A.ATTEND_VAL, '9999.00')  ATTEND_VAL,
+				   	TO_CHAR( A.FINAL_VAL, '9999.00')  FINAL_VAL,
+				   	A.USERNO,    
+                    B.MBERNM,  
+                    B.UNITY_ID,   
+                    B.EMAIL,      
+                    B.MOBLPHON,
+                    B.BIZNO,
+				    (SELECT SUM(FRAMESEQ)   FROM TB_LE_TREE_HIST WHERE CUSERNO = A.CUSERNO)  FRAMESEQ,
+				    (SELECT SUM(FRAMECNT) FRAMECNT FROM TB_ED_COURSE_TREE WHERE COURSENO = #{SES_COURSENO}) FRAMECNT  ,
+				    NVL(A.ISPASS, 'N')ISPASS ,
+				    A.COMPCODE ,
+				    A.COMPDATE ,
+				    B.COMNO ,     
+                    (SELECT COMNAME FROM TB_CT_COMPANY WHERE COMNO = B.COMNO) COMNAME
+				FROM 
+                     TB_LE_COURSE_USER A , TB_CT_UNITY_MBER B
+                WHERE A.USERNO = B.UNITY_MBERNO
+                AND A.CSEQNO = #{SES_CSEQNO}
+				AND A.USEYN = 'Y'
+		)X 
+		WHERE 1=1    
+		ORDER BY  X.MBERNM ASC
+	</select>
+	
+	
+	
+	
+	<!-- 상시과정 목록 호출-->
+	<select id="getLeCourseAlwaysUSerList" parameterType="dmap" resultType="emap">
+		SELECT 
+	  		A.*
+	    FROM(
+			SELECT 
+				X.*,
+				<!-- RANK() OVER (ORDER BY to_number(FINAL_VAL)  DESC) RANK, -->
+	            TO_CHAR( (FRAMESEQ/FRAMECNT * 100) , '9999.00') PROG
+			FROM
+				(
+					SELECT 
+					    <!-- ROW_NUMBER() OVER (ORDER BY STARTDATE DESC) AS RNUM,
+			     	    ROW_NUMBER() OVER (ORDER BY STARTDATE ASC) AS NUM,
+	             	    COUNT(1) OVER() TOTALCNT,  -->
+			     	    ROWNUM AS RNUM,
+					    A.CUSERNO,
+					   	TO_CHAR( A.PROGRESS_VAL, '9999.00')  PROGRESS_VAL,
+					   	TO_CHAR( A.EXAM_MT_VAL, '9999.00')  EXAM_MT_VAL,
+					   	TO_CHAR( A.EXAM_FINAL_VAL, '9999.00')  EXAM_FINAL_VAL,
+					   	TO_CHAR( A.REPORT_VAL, '9999.00')  REPORT_VAL,
+					   	TO_CHAR( A.ATTEND_VAL, '9999.00')  ATTEND_VAL,
+					   	TO_CHAR( A.FINAL_VAL, '9999.00')  FINAL_VAL,
+					   	A.USERNO,    
+	                    B.MBERNM,  
+	                    B.UNITY_ID,   
+	                    B.EMAIL,      
+	                    B.MOBLPHON,
+	                    B.BIZNO,
+					    (SELECT SUM(FRAMESEQ)   FROM TB_LE_TREE_HIST WHERE CUSERNO = A.CUSERNO)  FRAMESEQ,
+					    (SELECT SUM(FRAMECNT) FRAMECNT FROM TB_ED_COURSE_TREE WHERE COURSENO = #{SES_COURSENO}) FRAMECNT,
+					    NVL(A.ISPASS, 'N') AS ISPASS ,
+					    A.COMPCODE,
+					    A.COMPDATE,
+					    A.STARTDATE,
+					    A.WDATE,
+					    B.COMNO,
+					    (SELECT COMNAME FROM TB_CT_COMPANY WHERE COMNO = B.COMNO) AS COMNAME
+					FROM TB_LE_COURSE_USER A, TB_CT_UNITY_MBER B 
+	                WHERE A.USERNO = B.UNITY_MBERNO 
+	                AND   A.CSEQNO = #{SES_CSEQNO}
+					AND   A.USEYN = 'Y'
+					
+					 <if test="sdate != null and sdate != ''">
+				      AND TO_CHAR (A.STARTDATE, 'YYYY-MM-DD') BETWEEN #{sdate} AND #{edate}
+					 </if>
+					
+					 <if test="compType != null and compType != ''">
+				    		 AND A.ISPASS = #{compType}
+					</if>
+					
+				    <if test="searchKeyword != null and searchKeyword != ''">
+				    	<if test="selectOption == 'A'">
+				    		 AND B.UNITY_ID LIKE '%'|| #{searchKeyword}||'%'
+				    	</if>
+				    	<if test="selectOption == 'B'">
+				    		 AND B.MBERNM LIKE '%'|| #{searchKeyword}||'%'
+				    	</if>
+				    	
+				    	<if test="selectOption == ''">
+				    		AND (B.UNITY_ID LIKE '%'|| #{searchKeyword}||'%' OR  B.MBERNM LIKE '%'|| #{searchKeyword}||'%')
+				    	</if>
+					</if>
+					ORDER BY STARTDATE DESC
+				)X 
+				ORDER BY  X.WDATE DESC
+		 ) A
+	    WHERE 1=1
+	 	 <if test="startNo != null and startNo != ''">
+			AND RNUM BETWEEN #{startNo} AND #{endNo}
+		</if> 	   
+		
+	</select>
+	
+	
+	 <update id="updateLeCourseUserInfo" parameterType="dmap">
+		UPDATE 
+		    TB_LE_COURSE_USER SET  
+			    PROGRESS_VAL = #{progressVal} 
+			    ,EXAM_MT_VAL = #{examMtVal} 
+			    ,EXAM_FINAL_VAL = #{examFinalVal} 
+			    ,REPORT_VAL = #{reportVal} 
+			    ,ATTEND_VAL = #{attendVal} 
+			    ,FEDATE = SYSDATE 
+			    ,FINAL_VAL = #{finalVal} 
+			    ,ISPASS = #{ispass}
+			    ,RANK = #{rank}
+			    <if test='compYN != null and compYN == "Y"'>
+			    ,COMPCODE = #{compCode}
+			    ,COMPDATE = SYSDATE
+			    </if>  
+		WHERE CUSERNO = #{cuserNo} 
+	</update>
+	
+	<update id="updateLeCourseUserRankInfo" parameterType="dmap">
+		UPDATE TB_LE_COURSE_USER SET  
+		    RANK = #{rank} 
+		WHERE CUSERNO = #{cuserNo} 
+	</update>
+	
+	<select id="getEdCourseInfo" parameterType="dmap" resultType="emap">
+		SELECT 
+			SEQ_TITLE, MT_CTYPE_CODE 
+		FROM 
+			TB_ED_COURSE_SEQ A , TB_ED_COURSE B 
+		WHERE 
+			A.COURSENO = B.COURSENO 
+		AND 
+			A.COURSENO = #{SES_COURSENO}
+		AND 
+			A.CSEQNO = #{SES_CSEQNO}
+	</select>
+ 
+	<select statementType="CALLABLE" id="cuserCompExec"  resultType="map" parameterMap="cuserMap">
+		{CALL TB_COURSE_COMP_SYS_NICS.CUSER_COMP_EXEC (?, ?, ?, ?)}					 
+	</select>
+	
+</mapper>

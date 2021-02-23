@@ -1,0 +1,312 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 진도처리관련-->
+<mapper namespace="com.webapp.classdesk.mapper.ClassdeskProgMapper">
+	
+	<select id="getEdCourseTreeInfo" parameterType="dmap" resultType="emap">
+         SELECT 
+		    TREENO
+		    , COURSENO
+		    , SDAY
+		    , SUBJECT
+		    , FRAMECNT
+		    , RUNTIME
+		    , FILE_PATH
+		    , TREE_FILE_PATH
+		    , START_FILE
+		    , MOBILE_FILE_PATH
+		    , MOBILE_TREE_FILE_PATH
+		    , MOBILE_START_FILE
+		     
+		FROM   TB_ED_COURSE_TREE
+		WHERE TREENO= #{treeno}
+	</select>
+	
+	<select id="getLeCourseTreeHistInfo" parameterType="dmap" resultType="emap">
+       /*getLeCourseTreeHistInfo*/
+       SELECT
+		    TREENO
+		    , CUSERNO
+		    , FRAMESEQ
+		    , STUDYTIME
+		    , (FLOOR(MOVSEC / (60*60))) AS MOVSEC_HH
+            , LPAD(FLOOR(MOD((MOVSEC / 60),60)), 2 , 0) AS MOVSEC_MM
+            , LPAD(FLOOR(MOD(MOVSEC, 60)), 2 , 0) AS MOVSEC_SS
+		    , VAL
+		    , SDATE
+		    , EDATE
+		    , STUDYCNT
+		    , MOVSEC
+		    , MT_PROG_STATUS_CODE
+		    , COMP_DATE
+		    , STUDYCNT
+		    , LAST_FRAMESEQ
+		    , FRAME_COMP_STATUS
+		FROM    TB_LE_TREE_HIST 
+		WHERE  TREENO= #{treeno}
+		AND  CUSERNO = #{cuserNo}
+	</select>
+
+	<!-- 현재까지 학습한 페이지 (FRAMESEQ) -->
+	<select id="getFrameseqInfo" parameterType="dmap"  resultType="int"> 
+		 SELECT COUNT(*)CNT FROM TB_LE_TREE_HIST WHERE CUSERNO =  #{cuserNo}  AND      TREENO = #{treeno}
+	</select>
+	
+	<!-- 최초 학습 정보 저장 -->	
+	<insert id="insertLeCourseTreeHist" parameterType="dmap">
+		/*insertLeCourseTreeHist*/
+		INSERT INTO TB_LE_TREE_HIST (
+		    CUSERNO
+		    , TREENO
+		    , FRAMESEQ
+		    , SDATE
+		    , EDATE
+		    , MT_PROG_STATUS_CODE
+		    , MOVSEC
+		    , STUDYTIME
+		    , VAL
+		    , LAST_FRAMESEQ
+		    , STUDYCNT 
+		    , FRAME_COMP_STATUS
+		    <if test="compYn != null and compYn != ''">
+		    , COMP_DATE
+		    </if>
+		) VALUES (
+			#{cuserNo}
+			, #{treeno}
+			, #{frameseq}
+			, SYSDATE
+			, SYSDATE
+			, #{mtProgStatusCode}
+			, #{movsec}
+			, #{studytime}
+			, #{val}
+			, #{lastFrameseq}
+			, 1
+			, #{frameCompStatus}
+			<if test="compYn != null and compYn != ''">
+			, SYSDATE
+			</if>
+		)
+	</insert>
+	
+	<!-- 학습정보 저장3 -->
+	 <update id="updateLeCourseTreeHist" parameterType="dmap">
+		/*updateLeCourseTreeHist*/
+		UPDATE 
+			TB_LE_TREE_HIST
+		SET FRAMESEQ = #{frameseq} 
+			,EDATE = SYSDATE
+			,MT_PROG_STATUS_CODE = #{mtProgStatusCode} 
+			,MOVSEC = #{movsec} 
+			,LAST_FRAMESEQ=#{lastFrameseq} 
+			,VAL=#{val} 
+			,STUDYTIME = #{studytime}
+			,STUDYCNT = #{studycnt}
+			,FRAME_COMP_STATUS = #{frameCompStatus}
+			<if test="compYn != null and compYn != ''">
+			,COMP_DATE = SYSDATE
+			</if>
+		WHERE CUSERNO = #{cuserNo}
+		AND TREENO = #{treeno}
+	</update>
+	
+	<select id="getEduseqYnInfo" parameterType="dmap" resultType="emap"> 
+         SELECT 
+         	A.CONURL, B.*  , C.* FROM 
+		(SELECT CONURL FROM TB_ED_COURSE   WHERE COURSENO =   #{courseno}         ) A,
+   		(SELECT  EDUSEQ_YN, NVL(OPENTYPE, 'D')OPENTYPE, EXAM_PROG_PERCENT ,  REVIEWDAY FROM TB_ED_COURSE_SEQ WHERE CSEQNO =  #{cseqno}    )B,
+   		(SELECT 
+		        CASE       
+		                WHEN TO_CHAR(STARTDATE,'YYYYMMDD') <![CDATA[<=]]>  TO_CHAR(SYSDATE,'YYYYMMDD') 		   
+		                 AND TO_CHAR(ENDDATE,'YYYYMMDD') <![CDATA[>=]]>   TO_CHAR(SYSDATE,'YYYYMMDD') 
+		       THEN 'Y'  
+		       ELSE 'N'  
+		       END     AS STUDY_YN,
+		       
+		       CASE                                      
+		                WHEN TO_CHAR(ENDDATE ,'YYYYMMDD') <![CDATA[< ]]>     TO_CHAR(SYSDATE,'YYYYMMDD')  
+		                AND TO_CHAR(ENDDATE+ (SELECT REVIEWDAY  FROM TB_ED_COURSE_SEQ WHERE CSEQNO = #{cseqno}  ) ,'YYYYMMDD') <![CDATA[>=]]>    TO_CHAR(SYSDATE,'YYYYMMDD') 
+		       THEN 'Y'  
+		       ELSE 'N'  
+		       END     AS RE_STUDY_YN 
+		       , COMPCODE
+		       , CASE WHEN PROGRESS_VAL = 100
+               THEN 'Y'
+               ELSE 'N'
+               END AS END_PROGRESS  
+       FROM TB_LE_COURSE_USER WHERE CUSERNO =     #{cuserNo} ) C
+	</select> 
+	
+	<!-- 성적 산출을 위한 정보 -->
+	<select id="getResultInfo" parameterType="dmap" resultType="emap">
+		SELECT * FROM
+        (
+            SELECT
+                A.EVAL_PROGRESS
+                ,NVL(A.OPENTYPE, 'D') AS OPENTYPE
+                ,A.COMP_VAL
+                ,B.ATTEND_VAL
+                ,B.EXAM_FINAL_VAL
+                ,B.REPORT_VAL
+                ,B.EXAM_MT_VAL
+            FROM
+                TB_ED_COURSE_SEQ A
+                ,TB_LE_COURSE_USER B
+                ,TB_ED_COURSE C
+            WHERE
+                A.CSEQNO = B.CSEQNO
+                AND A.COURSENO = C.COURSENO
+                AND A.courseno = #{courseno}
+                AND A.CSEQNO = #{cseqno}
+                AND B.CUSERNO = #{cuserNo}
+        ) A,
+        (SELECT SUM(FRAMECNT) TOT_FRAMECNT
+        		,SUM(RUNTIME*60) TOT_RUNTIME
+       		 FROM TB_ED_COURSE_TREE WHERE COURSENO = #{courseno})B,
+        (
+            SELECT 
+            SUM(FRAMESEQ) AS TOT_FRAMESEQ
+            ,SUM(STUDYTIME) AS TOT_STUDYTIME
+            FROM TB_LE_TREE_HIST
+            WHERE CUSERNO = #{cuserNo}
+        ) C
+	</select>
+	
+	<!-- 업데이트 성적 -->
+	<update id="updateEvalProg" parameterType="dmap"> 
+		UPDATE TB_LE_COURSE_USER 
+		SET PROGRESS_VAL = #{progVal}
+		<if test="OPENTYPE != null and OPENTYPE != ''">
+			, FINAL_VAL = #{finalVal}
+			<if test="isPass != null and isPass != ''">
+			, ISPASS = #{isPass}
+			</if>
+		</if>
+		<if test="compCode != null and compCode != ''">
+			, COMPCODE = #{compCode}
+			, COMPDATE = SYSDATE
+		</if>
+		
+		 WHERE CUSERNO = #{cuserNo}
+ 	</update>
+
+	<!-- 수료증코드체계 등록 -->
+ 	<update id="insertLeCompSeq" parameterType="dmap">
+ 		MERGE INTO TB_LE_COMP_SEQ A
+        USING DUAL
+            ON ( YYYY = TO_CHAR(SYSDATE,'YYYY') AND GUBUN = #{gubun_code}
+        )
+        WHEN MATCHED THEN
+         UPDATE SET
+            SEQ = #{compSeq}
+            , WDATE = SYSDATE
+        WHEN NOT MATCHED THEN
+         INSERT ( GUBUN
+				, YYYY
+				, SEQ
+				, WDATE
+		 )
+         VALUES (
+             #{gubun_code}
+			, TO_CHAR(SYSDATE,'YYYY')
+			, #{compSeq}
+			, SYSDATE
+		 )
+ 	</update>
+ 	
+ 	<!-- 수료코드발급 > 구분코드 -->
+	<select id="getCompGubunInfo" resultType="string">
+        SELECT 
+		    (SELECT UPPER(SUBSTR(REF1,0,1)) FROM TB_CD_MT_SUB WHERE MT_SUB_CODE = A.MT_SC_CODE) gubun_code
+		FROM TB_ED_COURSE A
+		WHERE COURSENO = #{courseno}
+    </select>
+	
+	<!-- 차시정보조회  -->
+	<select id="getEdCourseSeqInfo" parameterType="dmap" resultType="emap">
+		/*getEdCourseSeqInfo*/
+		SELECT 
+			EVAL_PROGRESS 
+			, EVAL_ATTEND 
+			, EVAL_REPORT 
+			, EVAL_EXAM_FINAL 
+			, ATTEND_PASSVAL 
+			, COMP_VAL 
+		FROM TB_ED_COURSE_SEQ 
+		WHERE CSEQNO = #{cseqno}
+	</select>
+	
+	<!-- 본인성적조회  -->
+	<select id="getLeCourseUserInfo" parameterType="dmap" resultType="emap">
+		/*getLeCourseUserInfo*/
+		SELECT 
+			PROGRESS_VAL 
+			, ATTEND_VAL 
+			, REPORT_VAL 
+			, EXAM_FINAL_VAL 
+			, FINAL_VAL 
+			, ISPASS
+			, COMPCODE
+		FROM TB_LE_COURSE_USER 
+		WHERE CUSERNO = #{cuserNo}
+	</select>
+	
+	<select id="getMaxCompCode" parameterType="dmap" resultType="int">
+		/*getMaxCompCode*/
+        SELECT NVL(MAX(SEQ)+1 ,1)
+         FROM TB_LE_COMP_SEQ
+         WHERE YYYY = TO_CHAR(SYSDATE,'YYYY')
+         AND GUBUN = #{gubun_code}
+	</select>
+	
+ 	<update id="updateMaxCompCode" parameterType="dmap">
+		/*updateMaxCompCode*/
+        UPDATE TB_LE_COMP_SEQ 
+        SET 
+	        SEQ = #{compSeq}
+	     WHERE YYYY = TO_CHAR(SYSDATE,'YYYY')
+	     AND GUBUN = #{gubun_code}
+	</update>
+	
+	<update id="updateLeCourseUserInfo" parameterType="dmap">
+		UPDATE 
+		    TB_LE_COURSE_USER SET  
+			    PROGRESS_VAL = #{progressVal} 
+			    ,EXAM_MT_VAL = #{examMtVal} 
+			    ,EXAM_FINAL_VAL = #{examFinalVal} 
+			    ,REPORT_VAL = #{reportVal} 
+			    ,ATTEND_VAL = #{attendVal} 
+			    ,FEDATE = SYSDATE 
+			    ,FINAL_VAL = #{finalVal} 
+			    ,ISPASS = #{ispass}
+			    ,RANK = #{rank}
+			    <if test='compYN != null and compYN == "Y"'>
+			    ,COMPCODE = #{compCode}
+			    ,COMPDATE = SYSDATE
+			    </if>  
+		WHERE CUSERNO = #{cuserNo} 
+	</update>
+	
+	<!-- 시험 체크 여부  -->
+	<select id="getCseqTestChkYnInfo" parameterType="dmap"  resultType="string" >
+		/* getCseqTestChkYnInfo */
+		SELECT 
+			CASE 
+				WHEN EVAL_EXAM_FINAL > 0 THEN 'Y'
+       		 	ELSE 'N' 
+       		 END TESTCHK
+         FROM TB_ED_COURSE_SEQ 
+		 WHERE CSEQNO = #{SES_CSEQNO}
+	</select>
+	
+	<!-- 전체 시험 참여 여부  -->
+	<select id="getCseqFinalTestYn" parameterType="dmap"  resultType="string" >
+		/* getCseqFinalTestYn */
+		SELECT CASE WHEN (SELECT COUNT(*) FROM TB_LE_EXAM WHERE CSEQNO = #{cseqno}) = (SELECT COUNT(*) FROM TB_LE_EXAM_APPLY WHERE CSEQNO = #{cseqno} AND CUSERNO = #{cuserNo}) THEN 'Y'
+                    ELSE 'N' END FINALTESTYN 
+        FROM TB_LE_COURSE_USER 
+        WHERE CUSERNO = #{cuserNo}
+	</select>
+</mapper>

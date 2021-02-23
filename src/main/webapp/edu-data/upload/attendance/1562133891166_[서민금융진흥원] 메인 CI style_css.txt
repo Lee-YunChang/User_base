@@ -1,0 +1,92 @@
+���α�������� > ����ڽý��� > ���� > CI ���� 8�� ���� ���
+
+SSFW_WWW\src\main\webapp\academy\common\css\style.css
+
+** ���� �ҽ� ** 
+
+.ul_sitelink > li > a{padding:8px 25px 8px 180px;font-size:1.4rem;height:58px;position:relative;display:table;width:100%}
+.ul_sitelink > li > a > .banTxt{height:41px;display:table-cell;vertical-align:middle;width:100%;padding-right:30px}
+.ul_sitelink > li > a:hover > .banTxt{background:url(../../images/main/link_over.png) right center no-repeat;color:#3c8296;font-family:NanumGothicBold;}
+.ul_sitelink > li > a > .banner{width:120px;height:41px;display:inline-block;position:absolute;top:50%;left:30px;margin-top:-21px}
+.ul_sitelink > li > a > .banner > img{width:120px;height:41px;}
+
+** ���� �ҽ� ** 
+
+.ul_sitelink > li > div {height: 58px; margin-top: 0.5px}
+.ul_sitelink > li > div > .span1 {margin:13px 47px 27px 77px; font-size:1.4rem;height:58px;position:relative;width:100%}
+.ul_sitelink > li > div > .span1 > a > .banner > img{width:120px;height:41px; margin-left: -11px; margin-top:9px;}
+.ul_sitelink > li > div > .span2 {padding:13px 77px 27px 57px;font-size:1.4rem;height:58px;position:relative;width:100%}
+.ul_sitelink > li > div > .span2 > a > .banner > img{width:120px;height:41px; margin-left: -11px; margin-top:9px;}
+
+
+
+************************************************
+@media screen and (max-width:1023px) and (min-width:768px) {
+    
+    /*  20190529 ���� CI ���� ������ START */
+	.ul_sitelink > li > div {height: 58px; margin-top: 0.5px}
+	.ul_sitelink > li > div > .span1 {margin:13px 29px; font-size:1.4rem;height:58px;position:relative;width:100%}
+	.ul_sitelink > li > div > .span1 > a > .banner > img{width:140px;height:41px; margin-left: -11px; margin-top:9px;}
+	
+	.ul_sitelink > li > div > .span2 {padding:13px 16px 27px 26px;font-size:1.4rem;height:58px;position:relative;width:100%}
+	.ul_sitelink > li > div > .span2 > a > .banner > img{width:140px;height :41px; margin-left: -11px; margin-top:9px;}
+    /*  20190529 ���� CI ���� ������ END */
+
+************************************************
+
+@media screen and (max-width:989px) and (min-width:768px) {
+    .li_quick > a,.li_quick:first-child > a{height:78px;font-size: 1.7rem}
+    .li_quick > a{background-position: 20px center;padding-left:84px}
+    .popzone img{height:238px;width:328px}
+    .ul_sitelink > li > a > .banner{margin-right: 15px;}
+}
+
+
+************************************************
+
+@media screen and (max-width:767px) {
+/* 	 .dt_tit {height:auto;} */  >>  �¶��� ���� > �����
+
+
+�߰�
+/*  20190529 ���� CI ���� ������ START */                                                                                    
+.ul_sitelink > li > div {height: 58px; margin-top: 0.5px}                                                             
+.ul_sitelink > li > div > .span1 {margin:13px 15px; font-size 1.4rem;height:58px;position:relative;width:100%}        
+.ul_sitelink > li > div > .span1 > a > .banner > img{width:100px;height:41px; margin-left: -11px;}                    
+.ul_sitelink > li > div > .span2 {padding:13px 32px 27px 56px;font-size:1.4rem;height:58px;position:relative;width:100
+.ul_sitelink > li > div > .span2 > a > .banner > img{width:100px;height :41px; margin-left: -11px;;}                  
+ /*  20190529 ���� CI ���� ������ END */                                                                                     
+
+************************************************
+@media screen and (max-width:330px) and  (min-width:100px){
+
+/*  20190529 ���� CI ���� ������ START */                                                                                    
+.ul_sitelink > li > div {height: 58px; margin-top: 0.5px}                                                             
+.ul_sitelink > li > div > .span1 {margin:13px 29px; font-size:1.4rem;height:58px;position:relative;width:100%}        
+.ul_sitelink > li > div > .span1 > a > .banner > img{width:100px;height:41px; margin-left: -11px;}                    
+.ul_sitelink > li > div > .span2 {padding:13px 34px 27px 36px;font-size:1.4rem;height:58px;position:relative;width:100
+.ul_sitelink > li > div > .span2 > a > .banner > img{width:100px;height :41px; margin-left: -11px;}                   
+/*  20190529 ���� CI ���� ������ END */                                                                                      
+
+************************************************
+
+
+/*  20190529 ���� CI ���� ������ START */                                                                                       
+@media screen and (max-width:380px) and  (min-width:300px){                                                              
+	.ul_sitelink > li > div {height: 58px; margin-top: 0.5px}                                                            
+	.ul_sitelink > li > div > .span1 {margin:13px 47px; font-size:1.4rem;height:58px;position:relative;width:100%}       
+	.ul_sitelink > li > div > .span1 > a > .banner > img{width:100px;height:41px; margin-left: -11px;}                   
+	.ul_sitelink > li > div > .span2 {padding:13px 34px 27px 36px;font-size:1.4rem;height:58px;position:relative;width:10
+	.ul_sitelink > li > div > .span2 > a > .banner > img{width:100px;height :41px; margin-left: -11px;}                  
+}                                                                                                                        
+                                                                                                                         
+@media screen and (max-width:320px) {                                                                                    
+	.ul_sitelink > li > div {height: 58px; margin-top: 0.5px}                                                            
+	.ul_sitelink > li > div > .span1 {margin:13px 30px; font-size:1.4rem;height:58px;position:relative;width:100%}       
+	.ul_sitelink > li > div > .span1 > a > .banner > img{width:100px;height:41px; margin-left: -11px;}                   
+	.ul_sitelink > li > div > .span2 {padding:13px 34px 27px 36px;font-size:1.4rem;height:58px;position:relative;width:10
+	.ul_sitelink > li > div > .span2 > a > .banner > img{width:100px;height :41px; margin-left: -11px;}                  
+}                                                                                                                        
+/*  20190529 ���� CI ���� ������ END */                                                                                         
+
+

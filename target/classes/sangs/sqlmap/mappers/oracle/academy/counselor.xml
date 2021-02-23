@@ -1,0 +1,325 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.webapp.academy.mapper.CounselorMapper">
+
+    <resultMap id="clobMap" type="emap">
+        <result property="CONTENT" column="CONTENT" jdbcType="CLOB" javaType="java.lang.String"/>
+        <result property="AN_CONTENT" column="AN_CONTENT" jdbcType="CLOB" javaType="java.lang.String"/>
+    </resultMap>
+
+    <resultMap id="popClobMap" type="emap">
+        <result property="POP_CONTENT" column="POP_CONTENT" jdbcType="CLOB" javaType="java.lang.String"/>
+    </resultMap>
+
+    <!-- 게시판리스트 -->
+    <select id="getPersonalCounselorList" resultMap="clobMap" parameterType="dmap">
+    	SELECT A.*
+		FROM (
+			      SELECT ROW_NUMBER() OVER(ORDER BY TOPYN DESC, GRPNO DESC, BBSNO ASC )RNUM
+			       	 , BBSNO
+					 , USERNO
+					 , WRITER
+			       	 , TO_CHAR(WDATE , 'YYYY.MM.DD')AS WDATE
+					 , TITLE
+					 , CONTENT
+					 , RCNT
+					 , GRPNO
+					 , REFLEVEL
+					 , REFSTEP
+					 , BCATENO
+					 , PWD
+					 , ETC_INFO01
+					 , TOPYN
+					 , ORDTM_AT
+					 , OPEN_AT
+					 , DSCSN_SDATE
+					 , DSCSN_EDATE
+					 , CONNECT_IP
+					 , UPDT_ID
+					 , UPDT_DATE
+					 , MT_CATE_CODE
+					 , (SELECT MT_SUB_NAME FROM TB_CD_MT_SUB WHERE MT_SUB_CODE = A.MT_CATE_CODE) MT_CATE_NAME
+			         , (SELECT NVL(UNITY_ID,'-') FROM TB_CT_UNITY_MBER WHERE UNITY_MBERNO = A.USERNO) AS USERID
+			         , (SELECT BCATENAME FROM TB_ED_BBS_CATEGORY WHERE A.BCATENO = BCATENO) AS BCATENAME
+			         , (SELECT COUNT(*) FROM TB_ED_BBS_FILE B WHERE B.BBSNO = A.BBSNO) AS FILECNT    
+			         , CASE WHEN (SYSDATE - WDATE <![CDATA[ <= ]]> 1 AND SYSDATE - WDATE <![CDATA[ > ]]> 0) THEN 'new_btn' ELSE 'null_btn'  END AS NEWBTN
+			         , ROUND(SYSDATE - WDATE) AS DATE_DIFF
+			         , COUNSEL_STATE_CODE
+			         , (SELECT MT_SUB_NAME FROM TB_CD_MT_SUB WHERE MT_SUB_CODE = A.COUNSEL_STATE_CODE) COUNSEL_STATE_NAME
+			    FROM TB_ED_BBS A
+			    WHERE ((BCATENO = 1036 AND USERNO = #{SES_USERNO})
+                OR (BCATENO = 1036 AND AN_USERNO = #{SES_USERNO}))
+                <if test="mtLecCounselCode != null and mtLecCounselCode != '' ">
+					AND MT_CATE_CODE = #{mtLecCounselCode}
+				</if>
+                <if test="searchWord != null and searchWord != '' ">
+					AND TITLE LIKE '%' || #{searchWord} || '%'
+				</if>
+				ORDER BY TOPYN DESC
+		) A
+		WHERE 1=1
+		AND RNUM BETWEEN #{startNo} AND #{endNo}    
+		ORDER BY TOPYN DESC, WDATE DESC
+    </select>
+	
+	<!-- 게시판 리스트 카운트  -->
+    <select id="getPersonalCounselorListCnt" resultType="int" parameterType="int">
+        SELECT COUNT(*)
+        FROM TB_ED_BBS A
+		WHERE ((BCATENO = 1036 AND USERNO = #{SES_USERNO})
+                OR (BCATENO = 1036 AND AN_USERNO = #{SES_USERNO}))
+        <if test="mtLecCounselCode != null and mtLecCounselCode != '' ">
+			AND MT_CATE_CODE = #{mtLecCounselCode}
+		</if>
+        <if test="searchWord != null and searchWord != '' ">
+			AND TITLE LIKE '%' || #{searchWord} || '%'
+		</if>
+    </select>
+	
+	<!-- 게시글 상세 -->
+    <select id="getCounselorBoardView" resultMap="clobMap" parameterType="dmap">
+        	SELECT A.*
+        		, B.APPLYNM
+        		, B.MOBLPHON
+        		, B.TELNO
+        		, B.TELNO
+        		, B.EMAIL
+			FROM 
+			(
+				SELECT BBSNO
+					 , USERNO
+					 , WRITER
+			       	 , TO_CHAR(WDATE,'yyyy.mm.dd') AS WDATE
+					 , TITLE
+					 , CONTENT
+					 , RCNT
+					 , GRPNO
+					 , REFLEVEL
+					 , REFSTEP
+					 , BCATENO
+					 , PWD
+					 , ETC_INFO01
+					 , TOPYN
+					 , ORDTM_AT
+					 , OPEN_AT
+					 , DSCSN_SDATE
+					 , DSCSN_EDATE
+					 , CONNECT_IP
+					 , UPDT_ID
+					 , UPDT_DATE
+					 , CATENO
+					 , TO_CHAR(AN_WATE,'yyyy.mm.dd HH24:MI') AS AN_WATE
+			         , (SELECT NVL(UNITY_ID,'-') FROM TB_CT_UNITY_MBER WHERE UNITY_MBERNO = A.USERNO) AS USERID
+			         , (SELECT BCATENAME FROM TB_ED_BBS_CATEGORY WHERE A.BCATENO = BCATENO) AS BCATENAME
+			         , (SELECT COUNT(*) FROM TB_ED_BBS_FILE B WHERE B.BBSNO = A.BBSNO) AS FILECNT    
+		             , LEAD(BBSNO,1) OVER( ORDER BY TOPYN DESC,GRPNO DESC, REFSTEP ASC) AS BBSNO_PREV
+					 , LAG(BBSNO,1) OVER(ORDER BY TOPYN DESC,GRPNO DESC, REFSTEP ASC) AS BBSNO_NEXT
+					 , A.AN_USERNO
+					 , (SELECT NVL(MBERNM,'-') FROM TB_CT_UNITY_MBER WHERE UNITY_MBERNO = A.AN_USERNO) AS AN_USERNM
+					 , COUNSEL_STATE_CODE
+					 , AN_CONTENT
+					 , (SELECT MT_SUB_NAME FROM TB_CD_MT_SUB WHERE MT_SUB_CODE = A.MT_JOB_CODE) AS MT_JOB_NAME
+					 , (SELECT MT_SUB_NAME FROM TB_CD_MT_SUB WHERE MT_SUB_CODE = A.MT_CATE_CODE) AS MT_CATE_NAME
+		       FROM TB_ED_BBS A
+		       WHERE BCATENO = 1036
+		       AND ((BCATENO = 1036 AND OPEN_AT = 'Y') 
+                OR (BCATENO = 1036 AND USERNO = #{SES_USERNO})
+                OR (BCATENO = 1036 AND AN_USERNO = #{SES_USERNO}))
+                <if test="searchWord != null and searchWord != '' ">
+					AND TITLE LIKE '%' || #{searchWord} || '%'
+				</if>
+				<if test="mtLecCounselCode != null and mtLecCounselCode != '' ">
+					AND MT_CATE_CODE = #{mtLecCounselCode}
+				</if>
+		      
+		     )A , TB_CS_COUNSEL_USER_INFO B
+		     WHERE A.BBSNO = #{bbsNo}
+		     AND A.BBSNO = B.BBSNO
+    </select>
+    
+    <select id="getFileList" resultType="emap" parameterType="int">
+        SELECT FILE_ID
+			, FILE_SEQ 
+			, FILE_SIZE
+			, SAVFILE
+	        , ORGFILE
+	        , SAVPATH
+            , BBSNO
+        FROM TB_ED_DATA_FILE
+        WHERE BBSNO = #{bbsNo}
+    </select>
+    
+    <select id="getFileInfo" resultType="emap" parameterType="dmap">
+		SELECT SAVPATH
+			, ORGFILE
+			, SAVFILE
+		FROM TB_ED_DATA_FILE
+		WHERE BBSNO =  #{bbsNo}
+		AND FILE_ID = #{fileId}
+		AND FILE_SEQ = #{fileSeq}
+   </select>
+   
+   <insert id="insertCounselUserInfo" parameterType="dmap">
+		INSERT INTO TB_CS_COUNSEL_USER_INFO(
+			COUNSEL_SEQ,
+			USER_NO,
+			BBSNO,
+			APPLYNM,
+			MOBLPHON,
+			<if test="confirmTel != null and confirmTel != ''">
+				TELNO,
+			</if>
+			EMAIL,
+			LNM_ZIP,
+			LNM_ADRES1,
+			LNM_ADRES2,
+			REGISTER,
+			UPDDE,
+			RGSDE
+		)
+		VALUES (
+			(SELECT NVL(MAX(COUNSEL_SEQ),0)+1 FROM TB_CS_COUNSEL_USER_INFO),
+			#{SES_USERNO},
+			#{bbsNo},
+			#{applyNm},
+			#{confirmMobile},
+			<if test="confirmTel != null and confirmTel != ''">
+				#{confirmTel},
+			</if>
+			#{email},
+			#{lelnmZip},
+			#{lelnmAdres1},
+			#{lelnmAdres2},
+			#{SES_USERNAME},
+			SYSDATE,
+			SYSDATE
+		)
+	</insert>
+	
+	<select id="getOpenCounselorList" resultMap="clobMap" parameterType="dmap">
+    	SELECT A.*
+		FROM (
+			      SELECT ROW_NUMBER() OVER(ORDER BY TOPYN DESC, GRPNO DESC, BBSNO ASC )RNUM
+			       	 , BBSNO
+					 , USERNO
+					 , WRITER
+			       	 , TO_CHAR(WDATE , 'YYYY.MM.DD')AS WDATE
+					 , TITLE
+					 , CONTENT
+					 , RCNT
+					 , GRPNO
+					 , REFLEVEL
+					 , REFSTEP
+					 , BCATENO
+					 , PWD
+					 , ETC_INFO01
+					 , TOPYN
+					 , ORDTM_AT
+					 , OPEN_AT
+					 , DSCSN_SDATE
+					 , DSCSN_EDATE
+					 , CONNECT_IP
+					 , UPDT_ID
+					 , UPDT_DATE
+					 , MT_CATE_CODE
+					 , (SELECT MT_SUB_NAME FROM TB_CD_MT_SUB WHERE MT_SUB_CODE = A.MT_CATE_CODE) MT_CATE_NAME
+			         , (SELECT NVL(UNITY_ID,'-') FROM TB_CT_UNITY_MBER WHERE UNITY_MBERNO = A.USERNO) AS USERID
+			         , (SELECT BCATENAME FROM TB_ED_BBS_CATEGORY WHERE A.BCATENO = BCATENO) AS BCATENAME
+			         , (SELECT COUNT(*) FROM TB_ED_BBS_FILE B WHERE B.BBSNO = A.BBSNO) AS FILECNT    
+			         , CASE WHEN (SYSDATE - WDATE <![CDATA[ <= ]]> 1 AND SYSDATE - WDATE <![CDATA[ > ]]> 0) THEN 'new_btn' ELSE 'null_btn'  END AS NEWBTN
+			         , ROUND(SYSDATE - WDATE) AS DATE_DIFF
+			         , COUNSEL_STATE_CODE
+			         , (SELECT MT_SUB_NAME FROM TB_CD_MT_SUB WHERE MT_SUB_CODE = A.COUNSEL_STATE_CODE) COUNSEL_STATE_NAME
+			    FROM TB_ED_BBS A
+			    WHERE BCATENO = 1036 
+			    	AND OPEN_AT = 'Y' 
+			    	AND COUNSEL_STATE_CODE = 'CS0004'
+                <if test="mtLecCounselCode != null and mtLecCounselCode != '' ">
+					AND MT_CATE_CODE = #{mtLecCounselCode}
+				</if>
+                <if test="searchWord != null and searchWord != '' ">
+					AND TITLE LIKE '%' || #{searchWord} || '%'
+				</if>
+				ORDER BY TOPYN DESC
+		) A
+		WHERE 1=1
+		AND RNUM BETWEEN #{startNo} AND #{endNo}    
+		ORDER BY TOPYN DESC, WDATE DESC
+    </select>
+	
+	<!-- 게시판 리스트 카운트  -->
+    <select id="getOpenCounselorListCnt" resultType="int" parameterType="int">
+        SELECT COUNT(*)
+        FROM TB_ED_BBS A
+		WHERE BCATENO = 1036 
+	    	AND OPEN_AT = 'Y' 
+	    	AND COUNSEL_STATE_CODE = 'CS0004'
+        <if test="mtLecCounselCode != null and mtLecCounselCode != '' ">
+			AND MT_CATE_CODE = #{mtLecCounselCode}
+		</if>
+        <if test="searchWord != null and searchWord != '' ">
+			AND TITLE LIKE '%' || #{searchWord} || '%'
+		</if>
+    </select>
+    
+    <select id="getCounselorOpenBoardView" resultMap="clobMap" parameterType="dmap">
+        	SELECT A.*
+        		, B.APPLYNM
+        		, B.MOBLPHON
+        		, B.TELNO
+        		, B.TELNO
+        		, B.EMAIL
+			FROM 
+			(
+				SELECT BBSNO
+					 , USERNO
+					 , WRITER
+			       	 , TO_CHAR(WDATE,'yyyy.mm.dd') AS WDATE
+					 , TITLE
+					 , CONTENT
+					 , RCNT
+					 , GRPNO
+					 , REFLEVEL
+					 , REFSTEP
+					 , BCATENO
+					 , PWD
+					 , ETC_INFO01
+					 , TOPYN
+					 , ORDTM_AT
+					 , OPEN_AT
+					 , DSCSN_SDATE
+					 , DSCSN_EDATE
+					 , CONNECT_IP
+					 , UPDT_ID
+					 , UPDT_DATE
+					 , CATENO
+					 , TO_CHAR(AN_WATE,'yyyy.mm.dd HH24:MI') AS AN_WATE
+			         , (SELECT NVL(UNITY_ID,'-') FROM TB_CT_UNITY_MBER WHERE UNITY_MBERNO = A.USERNO) AS USERID
+			         , (SELECT BCATENAME FROM TB_ED_BBS_CATEGORY WHERE A.BCATENO = BCATENO) AS BCATENAME
+			         , (SELECT COUNT(*) FROM TB_ED_BBS_FILE B WHERE B.BBSNO = A.BBSNO) AS FILECNT    
+		             , LEAD(BBSNO,1) OVER( ORDER BY TOPYN DESC,GRPNO DESC, REFSTEP ASC) AS BBSNO_PREV
+					 , LAG(BBSNO,1) OVER(ORDER BY TOPYN DESC,GRPNO DESC, REFSTEP ASC) AS BBSNO_NEXT
+					 , A.AN_USERNO
+					 , (SELECT NVL(MBERNM,'-') FROM TB_CT_UNITY_MBER WHERE UNITY_MBERNO = A.AN_USERNO) AS AN_USERNM
+					 , COUNSEL_STATE_CODE
+					 , AN_CONTENT
+					 , (SELECT MT_SUB_NAME FROM TB_CD_MT_SUB WHERE MT_SUB_CODE = A.MT_JOB_CODE) AS MT_JOB_NAME
+					 , (SELECT MT_SUB_NAME FROM TB_CD_MT_SUB WHERE MT_SUB_CODE = A.MT_CATE_CODE) AS MT_CATE_NAME
+		       FROM TB_ED_BBS A
+		       WHERE BCATENO = 1036
+		       AND BCATENO = 1036 
+			    	AND OPEN_AT = 'Y' 
+			    	AND COUNSEL_STATE_CODE = 'CS0004'
+                <if test="searchWord != null and searchWord != '' ">
+					AND TITLE LIKE '%' || #{searchWord} || '%'
+				</if>
+				<if test="mtLecCounselCode != null and mtLecCounselCode != '' ">
+					AND MT_CATE_CODE = #{mtLecCounselCode}
+				</if>
+		      
+		     )A , TB_CS_COUNSEL_USER_INFO B
+		     WHERE A.BBSNO = #{bbsNo}
+		     AND A.BBSNO = B.BBSNO
+    </select>
+</mapper>

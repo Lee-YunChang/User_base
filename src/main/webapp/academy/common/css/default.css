@@ -1,0 +1,7 @@
+@charset "UTF-8";
+
+/* reset */
+body,div,dl,dt,dd,ul,li,ol,h1,h2,h3,h4,h6,pre,code,fieldset,legend,textarea,p,blockquote,th,td,input,select,textarea,button{margin:0;padding:0}
+fieldset,img{border:0 none}
+blockquotemq{list-style:none}
+blockquote::before, blockquote:after,q::before,q::before,q::after{content:'';content:none}

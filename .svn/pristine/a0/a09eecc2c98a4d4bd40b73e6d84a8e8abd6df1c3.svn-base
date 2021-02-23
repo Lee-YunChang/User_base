@@ -1,0 +1,386 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 클래스데스크 > 게시판관련 -->
+<mapper namespace="com.webapp.classdesk.mapper.ClassdeskBoardMapper">
+	<resultMap id="clobMap" type="emap">      
+        <result property="CONTENT" column="CONTENT" jdbcType="CLOB" javaType="java.lang.String"/>
+        <result property="AN_CONTENT" column="AN_CONTENT" jdbcType="CLOB" javaType="java.lang.String"/>
+    </resultMap>  
+    
+	<select id="getBoardList" parameterType="dmap" resultType="emap">
+	  SELECT * FROM 
+			(SELECT a.*, ROWNUM AS RNUM FROM
+				(  
+					SELECT 
+						  BBSNO, WRITER, TO_CHAR(WDATE,'yyyy-mm-dd') AS WDATE, TITLE, RCNT, Z.BCATENO, Z.BCATENAME, ANYN, Y.POPYN, Y.POP_PATH, Y.POP_FILE,
+						  '-' AS USERID, '-' AS SAVPATH, '-' AS SAVFILE, '-' AS ORGFILE, Z.BBSTYPE, Z.INTYPE, GRPNO, REFLEVEL, REFSTEP,
+						  CASE WHEN (SYSDATE - WDATE <![CDATA[ <= ]]> 1 AND SYSDATE - WDATE <![CDATA[ > ]]> 0) THEN 'new_btn' ELSE 'null_btn'  END AS NEWBTN,
+						    COUNT(BBSNO) OVER() TOTAL,  COURSENO, CSEQNO
+					FROM
+					(
+					  SELECT * FROM (
+						SELECT X.*  FROM (
+							SELECT 
+								BBSNO BNO FROM TB_ED_BBS
+							WHERE 1=1 
+								<choose>
+			                        <when test="bcateno != null and bcateno != ''">
+			                            AND BCATENO = #{bcateno}
+			                        </when>
+			                        <otherwise>
+			                            AND BCATENO IN (
+			                                    SELECT BCATENO 
+			                                      FROM TB_ED_BBS_CATEGORY 
+			                                     WHERE PBCATENO = #{bcateno}
+			                               )  
+			                        </otherwise>
+			                    </choose>
+							AND 
+								COURSENO =  #{SES_COURSENO}
+							AND 
+								CSEQNO =  #{SES_CSEQNO}
+							<if test="searchWord != null and searchWord != ''">
+		                        <if test="searchMode == 'title'">
+		                            AND TITLE LIKE '%'|| #{searchWord} ||'%'
+	                        	</if>	
+								<if test="searchMode == 'content'">
+		                            AND CONTENT LIKE '%'|| #{searchWord} ||'%'
+		                        </if>
+		                        <if test="searchMode == 'writer'">
+		                            AND WRITER LIKE '%'|| #{searchWord} ||'%'
+		                        </if>
+		                    </if>
+							ORDER BY GRPNO DESC, BBSNO ASC) X
+						 )   
+					) X, TB_ED_BBS Y, TB_ED_BBS_CATEGORY Z
+					WHERE X.BNO = Y.BBSNO AND Y.BCATENO = Z.BCATENO 
+					ORDER BY  BBSNO DESC
+				) a WHERE 1=1 
+			)  
+		<if test="startNo != null and startNo != ''">
+            WHERE RNUM BETWEEN #{startNo} AND #{endNo}
+        </if>
+	</select>
+	
+	<insert id="insertBoardInfo" parameterType="dmap">
+		INSERT 
+		  INTO TB_ED_BBS 
+		       ( 
+		           BBSNO, 
+		           WRITER, 
+		           WDATE, 
+		           TITLE, 
+		           CONTENT, 
+		           RCNT, 
+		           GRPNO, 
+		           REFLEVEL, 
+		           REFSTEP, 
+		           USERNO, 
+		           BCATENO, 
+		           PWD, 
+		           ETC_INFO01,
+		           TOPYN,
+		           POPYN,
+		           POP_PATH,
+		           POP_FILE,
+		           POP_WIDTH,
+		           POP_HEIGHT,
+		           COURSENO,
+		           CSEQNO,
+		           OPEN_AT
+		       ) 
+		       VALUES 
+		       (
+		              #{bbsNo}, 
+		              #{SES_USERNAME}, 
+		              SYSDATE, 
+		              #{title}, 
+		              #{summary}, 
+		              0, 
+		              #{bbsNo}, 
+		              0, 
+		              0, 
+		              #{SES_USERNO}, 
+		              <choose>
+			              <when test="bcateno != null and bcateno != ''">
+			                  #{bcateno},
+			              </when>
+			              <otherwise>
+			                  (
+			                      SELECT MIN(BCATENO) 
+			                        FROM TB_ED_BBS_CATEGORY 
+			                       WHERE PBCATENO = #{pbcateno}
+			                  ), 
+			              </otherwise>
+			          </choose>
+		              '', 
+		              '',
+		              #{topYn},
+		              #{popYn},
+		              #{popPath},
+		              #{popFile},
+		              #{popWidth},
+		              #{popHeight},
+		              #{SES_COURSENO},
+		              #{SES_CSEQNO},
+		              #{openAt}
+		          )
+	</insert>
+	
+	<!-- 파일 bbsno 등록 -->
+    <update id="updateFileBbsno" parameterType="dmap">
+    	UPDATE TB_ED_BBS_FILE
+		   SET BBSNO = #{bbsNo}
+		 WHERE FILE_ID = #{fileId}
+    </update>
+	
+	
+	<select id="getMaxBoardNo" resultType="int" >
+		SELECT NVL(MAX(BBSNO),0)+1 
+		  FROM TB_ED_BBS
+	</select>
+	
+	<select id="getBoardView" resultMap="clobMap" parameterType="dmap">
+		SELECT A.* FROM(
+			SELECT a.BBSNO, 
+			       WRITER, 
+			       TO_CHAR(WDATE,'YYYY-MM-DD') as WDATE, 
+			       TITLE, 
+			       CONTENT, 
+			       RCNT, 
+			       GRPNO, 
+			       REFLEVEL, 
+			       REFSTEP,
+			       (SELECT NVL(UNITY_MBERNO,'0') FROM TB_CT_UNITY_MBER WHERE UNITY_MBERNO = a.USERNO) AS USERID,
+			        a.USERNO ,
+			        a.BCATENO,
+			        d.BCATENO AS PBCATENO,
+			        a.TOPYN,
+			       '' AS FILE_ID,
+			       '' AS ORGFILE,
+			       '' AS FILE_SIZE,
+			       '' AS SAVFILE,
+			       '' AS SAVPATH,
+			       a.AN_CONTENT,
+			       a.POPYN, a.POP_PATH, a.POP_FILE,
+			       d.ISCMT, d.ISPOP, d.ISANSWER, d.ISTOP,
+			       a.POP_WIDTH, a.POP_HEIGHT, a.COURSENO,
+			       (SELECT BCATENAME FROM TB_ED_BBS_CATEGORY WHERE a.BCATENO = BCATENO) BCATENAME
+			       , LEAD(BBSNO,1) OVER( ORDER BY TOPYN DESC ,GRPNO DESC, REFSTEP ASC) AS BBSNO_PREV
+	               , LAG(BBSNO,1) OVER(ORDER BY TOPYN DESC, GRPNO DESC, REFSTEP ASC) AS BBSNO_NEXT
+	               , LEAD(TITLE,1) OVER( ORDER BY TOPYN DESC, GRPNO DESC, REFSTEP ASC) AS BBSNO_PREV_TITLE
+	               , LAG(TITLE,1) OVER(ORDER BY TOPYN DESC, GRPNO DESC, REFSTEP ASC) AS BBSNO_NEXT_TITLE
+			 FROM TB_ED_BBS a, 
+			       TB_ED_BBS_CATEGORY d  
+			 WHERE SUBSTR(a.BCATENO,1,3)||0 = d.BCATENO
+			 AND a.BCATENO = #{bcateno}
+	         AND a.COURSENO = #{SES_COURSENO}
+	         <if test="searchWord != null and searchWord != '' ">
+		   		AND TITLE LIKE '%' || #{searchWord} || '%'
+		   	</if>
+		   	) A
+	    WHERE 1=1
+ 		<choose>
+	          <when test="bbsNo != null and bbsNo != ''">
+	              AND A.BBSNO = #{bbsNo}
+	          </when>
+	          <otherwise>
+	              AND A.BBSNO = 
+	              	(
+	              		SELECT MAX(BBSNO) 
+					 	FROM TB_ED_BBS 
+						WHERE BCATENO IN 
+					    (
+					     SELECT BCATENO 
+					     FROM TB_ED_BBS_CATEGORY 
+					     WHERE PBCATENO = #{pbcateno}
+					     )
+					 )  
+	          </otherwise>
+         </choose>
+	</select>
+	
+	<update id="updateBoardViewCnt" parameterType="dmap">
+		UPDATE TB_ED_BBS 
+	       SET RCNT = RCNT+1 
+	 WHERE BBSNO = #{bbsNo}
+	</update>
+	
+		
+	<update id="updateBoardInfo" parameterType="dmap">
+		UPDATE TB_ED_BBS 
+		       SET TITLE = #{title}, 
+		       CONTENT = #{summary},
+			   WDATE = sysdate 
+		 WHERE BBSNO = #{bbsNo} 
+	</update>
+	
+		
+	<delete id="deleteBoardInfo" parameterType="dmap">
+		DELETE FROM TB_ED_BBS 
+		 WHERE BBSNO = #{bbsNo} 
+	</delete>
+	
+	<select id="getFileInfo" resultType="emap" parameterType="int">
+		SELECT FILE_ID,
+		       ORGFILE,
+		       SAVFILE,
+		       SAVPATH 
+		  FROM TB_ED_BBS_FILE 
+		 WHERE FILE_ID = #{fileNo}
+	</select>
+	
+	<select id="getBbsFileInfo" resultType="emap" parameterType="dmap">
+		SELECT FILE_ID,
+		       ORGFILE,
+		       SAVFILE,
+		       SAVPATH,
+		       FILE_SIZE,
+		       BBSNO
+		  FROM TB_ED_COURSE_FILE 
+		 WHERE BBSNO = #{bbsNo}
+		 AND FILE_ID = #{fileId}
+		 AND FILE_SEQ = #{fileSeq}
+	</select>
+	
+	<!-- 파일 삭제 -->
+    <delete id="deleteFileInfo" parameterType="dmap">
+        DELETE
+          FROM TB_ED_BBS_FILE
+         WHERE BBSNO = #{bbsNo}
+    </delete>
+	
+	<insert id="insertFileInfo" parameterType="dmap">
+		INSERT INTO TB_ED_BBS_FILE 
+	       (
+	           FILE_ID,
+	           ORGFILE,
+	           SAVFILE,
+	           FILE_SIZE,
+	           FTYPE,
+	           DCNT,
+	           BBSNO,
+	           SAVPATH
+	       ) 
+	    VALUES
+	       (
+	              (SELECT NVL(MAX(FILE_ID),1)+1 
+	                FROM TB_ED_BBS_FILE
+	              ),
+	              #{uploadFileOrgName},
+	              #{uploadFileSaveName},
+	              #{uploadFileSize},
+	              '.',
+	              0,
+	              #{bbsNo},
+	              #{uploadFileFulltPath}
+	    ) 
+	</insert>
+	
+	<select id="getFileList" resultType="emap" parameterType="dmap">
+		SELECT FILE_ID,
+			   FILE_SEQ,
+		       ORGFILE,
+		       SAVFILE,
+		       SAVPATH,
+		       FILE_SIZE,
+		       BBSNO
+		  FROM TB_ED_COURSE_FILE 
+		 WHERE BBSNO = #{bbsNo}
+	</select>
+
+	<!-- 과정별 게시판 리스트 -->
+	<select id="getCourseBbsList" resultType="emap" parameterType="dmap">
+		SELECT * FROM 
+            (SELECT a.* FROM
+                (  
+					SELECT 
+ 					  CASE WHEN (CSEQNO = #{SES_CSEQNO})    THEN 'N' ELSE 'Y' END AS COMYN,  BBSNO, COURSENO, CSEQNO, WRITER, TO_CHAR(WDATE,'YYYY.MM.DD') AS WDATE, TITLE, RCNT, Z.BCATENO, Z.BCATENAME, ANYN, Y.POPYN, Y.POP_PATH, Y.POP_FILE,
+					  '-' AS USERID, '-' AS SAVPATH, '-' AS SAVFILE, '-' AS ORGFILE, Z.BBSTYPE, Z.INTYPE, GRPNO, REFLEVEL, REFSTEP
+					  , CASE WHEN (SYSDATE - WDATE <![CDATA[ <= ]]> 1 AND SYSDATE - WDATE <![CDATA[ > ]]> 0) THEN 'new_btn' ELSE 'null_btn'  END AS NEWBTN
+					  , ROWNUM AS RNUM, OPEN_AT, FILECNT
+                      , TOPYN 
+                      , ROUND(SYSDATE - WDATE) AS DATE_DIFF
+                      <!-- COUNT(BBSNO) OVER() TOTAL  -->
+					FROM
+					(
+					  SELECT * FROM (
+					    SELECT X.*, (SELECT COUNT(*) FROM TB_ED_COURSE_FILE B WHERE B.BBSNO = X.BNO AND B.OPEN_AT = 'Y') AS FILECNT FROM (
+					      SELECT BBSNO BNO
+                            FROM TB_ED_BBS
+                           WHERE 1=1
+					        <choose>
+		                        <when test="bcateno != null and bcateno != ''">
+		                            AND BCATENO = #{bcateno}
+		                        </when>
+		                        <otherwise>
+		                            AND BCATENO IN (
+		                                    SELECT BCATENO 
+		                                      FROM TB_ED_BBS_CATEGORY 
+		                                     WHERE PBCATENO = #{pbcateno}
+		                               )  
+		                        </otherwise>
+		                    </choose>  
+					   		
+					      ORDER BY GRPNO DESC, BBSNO ASC) X
+					  )X
+					) X, TB_ED_BBS Y, TB_ED_BBS_CATEGORY Z
+					WHERE X.BNO = Y.BBSNO AND Y.BCATENO = Z.BCATENO 
+					AND Y.COURSENO = #{SES_COURSENO}
+					AND (Y.CSEQNO = #{SES_CSEQNO} OR Y.CSEQNO= 0 ) 
+					ORDER BY TOPYN DESC, GRPNO DESC, BBSNO ASC
+		   ) a WHERE RNUM BETWEEN #{startNo} AND #{endNo}
+		   	<if test="searchWord != null and searchWord != '' ">
+		   		AND TITLE LIKE '%' || #{searchWord} || '%'
+		   	</if>
+		   	   AND A.OPEN_AT = 'Y'
+			)a
+	</select>
+	 
+	 <select id="getCourseBbsListCount" resultType="int" parameterType="dmap">
+		SELECT COUNT(*) FROM 
+            (SELECT a.* FROM
+                (  
+					SELECT 
+ 					  CASE WHEN (CSEQNO = #{SES_CSEQNO})    THEN 'N' ELSE 'Y' END AS COMYN,  BBSNO, COURSENO, CSEQNO, WRITER, TO_CHAR(WDATE,'yyyy-mm-dd') AS WDATE, TITLE, RCNT, Z.BCATENO, Z.BCATENAME, ANYN, Y.POPYN, Y.POP_PATH, Y.POP_FILE,
+					  '-' AS USERID, '-' AS SAVPATH, '-' AS SAVFILE, '-' AS ORGFILE, Z.BBSTYPE, Z.INTYPE, GRPNO, REFLEVEL, REFSTEP,
+					  CASE WHEN (SYSDATE - WDATE <![CDATA[ <= ]]> 1 AND SYSDATE - WDATE <![CDATA[ > ]]> 0) THEN 'new_btn' ELSE 'null_btn'  END AS NEWBTN,
+                      ROWNUM AS RNUM, OPEN_AT
+                      <!-- COUNT(BBSNO) OVER() TOTAL  -->
+					FROM
+					(
+					  SELECT * FROM (
+					    SELECT X.* FROM (
+					      SELECT BBSNO BNO
+                            FROM TB_ED_BBS
+                           WHERE 1=1
+					        <choose>
+		                        <when test="bcateno != null and bcateno != ''">
+		                            AND BCATENO = #{bcateno}
+		                        </when>
+		                        <otherwise>
+		                            AND BCATENO IN (
+		                                    SELECT BCATENO 
+		                                      FROM TB_ED_BBS_CATEGORY 
+		                                     WHERE PBCATENO = #{pbcateno}
+		                               )  
+		                        </otherwise>
+		                    </choose>  
+					   		
+					      ORDER BY GRPNO DESC, BBSNO ASC) X
+					  )X
+					) X, TB_ED_BBS Y, TB_ED_BBS_CATEGORY Z
+					WHERE X.BNO = Y.BBSNO AND Y.BCATENO = Z.BCATENO 
+					AND Y.COURSENO = #{SES_COURSENO}
+					AND (Y.CSEQNO = #{SES_CSEQNO} OR Y.CSEQNO= 0 ) 
+					ORDER BY GRPNO DESC, BBSNO ASC
+		   ) a WHERE 1=1
+		   	   AND A.OPEN_AT = 'Y'
+			)a WHERE 1=1
+			<if test="searchWord != null and searchWord != '' ">
+		   		AND TITLE LIKE '%' || #{searchWord} || '%'
+		   	</if>
+	</select>
+	
+</mapper>

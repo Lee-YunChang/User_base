@@ -1,0 +1,80 @@
+@font-face {
+ font-family: 'NanumGothic';
+ src: url(/academy/common/css/font/NanumGothic.eot);
+ src: url(/academy/common/css/font/NanumGothic.eot?#iefix) format('embedded-opentype'),
+      url(/academy/common/css/font/NanumGothic.woff) format('woff'),
+      url(/academy/common/css/font/NanumGothic.ttf) format('truetype');
+}
+
+@font-face {
+ font-family: 'NanumGothic-Bold';
+ src: url(/academy/common/css/font/NanumGothic-Bold.eot);
+ src: url(/academy/common/css/font/NanumGothic-Bold.eot?#iefix) format('embedded-opentype'),
+      url(/academy/common/css/font/NanumGothic-Bold.woff) format('woff'),
+      url(/academy/common/css/font/NanumGothic-Bold.ttf) format('truetype');
+}
+	*{margin:0; padding:0; font-family: 'NanumGothic'; }
+	body.body_bg { background-image:url('/academy/images//bg_img.png');background-repeat:no-repeat; background-size:cover; background-position:50% 50%; width:100%; }
+
+	/* header 부분 */
+	.header_wrap { width:100%; background-color:#333333;}
+	.header_wrap .header_title { position:relative; width:1000px; margin:0 auto; line-height:78px; }
+	.header_wrap .header_title > img { position:absolute; top:19px;}
+	.header_wrap .header_title > .header_text { color:#ffffff; font-size:28px; display:inline-block; padding-left:64px;}
+	/*----------------------------------------------------------------------------------------------------------------------------*/
+
+	/*section 부분 */
+	.section_wrap { width:100%; }
+	.section_wrap .section { width:1000px; height:601px; margin: 0 auto;  margin-top:120px;}
+	.section_wrap .section > .left_top { float:left; width:73%; height:260px; background-color:#274257; padding-top:40px; padding-left:30px; position:relative;}
+	.section_wrap .section > .left_top > .text_01 { font-size:24px; color:#ffffff;}
+	.section_wrap .section > .left_top > .text_01 > .title_big { font-size:24px; color:#a0bfd5; margin-bottom:5px; font-weight:bold;}
+	.section_wrap .section > .left_top > .text_02 {  width:62%; font-size:16px; color:#ffffff; margin-top:28px; overflow:hidden; }
+	.section_wrap .section > .left_top > .text_02 > p {height:62px; overflow:hidden;}
+	.section_wrap .section > .left_top > .text_02 > .title_small {height:18px;  font-size:16px; color:#a0bfd5; margin-bottom:5px; font-weight:bold;}
+	.section_wrap .section > .left_top > .text_03 { font-size:16px; color:#ffffff; margin-top:18px;}
+	.section_wrap .section > .left_top > .text_03 > .title_small { font-size:16px; color:#a0bfd5; margin-bottom:5px; font-weight:bold;}
+	.section_wrap .section > .left_top > .online_icon { position:absolute; right:10px; bottom:30px;}
+	.section_wrap .section > .right_top { float:left; width:24%; height:300px;}
+	.section_wrap .section > .right_top > a > .right_top_01 {clear:both; width:100%; height:117px; background-color:#2a75a9; text-align:center; padding-top:33px;}
+	.section_wrap .section > .right_top > a { text-decoration:none;}
+	.section_wrap .section > .right_top > a > .right_top_01 > img { margin-top:20px;}
+	.section_wrap .section > .right_top > a > .right_top_01 > p { color:#ffffff; font-size:18px; }
+	.section_wrap .section > .right_top > .right_top_02 { width:100%; height:98px; background-color:#1d5b85; text-align:center; padding-top:52px;}
+	.section_wrap .section > .right_top > .right_top_02 > img {margin-top:20px; }
+	.section_wrap .section > .right_top > .right_top_02 > p {   color:#ffffff; font-size:18px;}
+	.section_wrap .section > .right_top > .right_top_02 > .call_num { font-size:26px; margin-top:10px;}
+	.section_wrap .section > .left_bottom { float:left; width:50%; height:270px; background-color:#ffffff; padding-top:30px; padding-left:30px; overflow:auto;}
+	.section_wrap .section > .left_bottom > p { font-size:18px; color:#333333; font-weight:bold;}
+	.section_wrap .section > .left_bottom > ul { margin-top:10px;}
+	.section_wrap .section > .left_bottom > ul > li > a {text-decoration:none; color:#666666;}
+	.section_wrap .section > .left_bottom > ul > li   { position:relative; list-style:none; width:95%; height:56px; border-bottom:1px solid #dcdcdc;  line-height:56px;  white-space: nowrap; text-overflow:ellipsis; overflow:hidden;}
+	.section_wrap .section > .left_bottom > ul > li > a > span {}
+	.section_wrap .section > .left_bottom > ul > li > a > .list_time {margin-left:25px; margin-right:5px;}
+	.section_wrap .section > .left_bottom > ul > li > a > img {position:absolute; left:12px; top:24px;}
+	.section_wrap .section > .right_bottom { float:left; width:47%; height:300px; background-color:#274257; }
+	.section_wrap .section > .right_bottom > .right_bottom_01 { width:100%; height:150px; background-color:#8f6048;}
+	.section_wrap .section > .right_bottom > .right_bottom_01 > p {padding-left:30px; padding-top:30px; font-size:18px; color:#ffffff; font-weight:bold;}
+	.section_wrap .section > .right_bottom > .right_bottom_01 > select {
+		
+		margin-left:30px; margin-top:18px; width:410px;height:40px; -webkit-appearance: none; -moz-appearance: none; appearance: none;  
+		background: url('/academy/images//icon_arrow.png') no-repeat 95% 50%; 	background-color:#ffffff; color:#666666; font-size:16px; padding-left:20px; border:0;
+		}
+	.section_wrap .section > .right_bottom > .right_bottom_01 > select::-ms-expand { 
+	  display: none;
+	}
+	.section_wrap .section > .right_bottom > .right_bottom_02 { position:relative; width:100%; height:150px; background-color:#dfc184; }
+	.section_wrap .section > .right_bottom > .right_bottom_02 > img {position:absolute; left:24px;top:43px;}
+	.section_wrap .section > .right_bottom > .right_bottom_02 > .right_bottom_02_text{ width:360px; margin-left:100px; padding-top:45px; }
+	.section_wrap .section > .right_bottom > .right_bottom_02 > .right_bottom_02_text > .right_bottom_02_guide {font-size:13px; color:#8f6048; font-weight:bold;  margin-top:10px; line-height:18px; text-overflow:ellipsis; overflow:hidden;}
+	.section_wrap .section > .right_bottom > .right_bottom_02 > .right_bottom_02_text > .right_bottom_02_title {font-size:18px; color:#8f6048; font-weight:bold;}
+	/*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+
+	
+	/*footer 부분*/
+	.footer_wrap { width:100%; height:92px; background-color:#ffffff; margin-top:123px;}
+	.footer_wrap .footer { width:1000px; margin:0 auto;}
+	.footer_wrap .footer > .footer_title { line-height:92px; float:left; font-size:18px; color:#59595b; margin-right:23px;}
+	.footer_wrap .footer > .footer_text {  font-size:11px; color:#59595b; padding-top:35px;}
+	/*-------------------------------------------------------------------------------------------------------------------------------------*/
+

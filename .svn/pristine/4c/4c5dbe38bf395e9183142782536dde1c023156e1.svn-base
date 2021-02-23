@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 클래스데스크 > 학생 > 진도학습관련 -->
+<mapper namespace="com.webapp.classdesk.mapper.ClassdeskUserProgressMapper">
+	<select id="getEdCourseTreeList" parameterType="dmap" resultType="emap">
+        /*user_progress.getEdCourseTreeList*/
+		SELECT 
+			AA.* 
+			,ROUND((AA.FRAMESEQ * 0.1)/(AA.FRAMECNT * 0.1)*100,2) AS PROGRESS_VAL
+				
+		FROM
+			(
+				SELECT 
+					A.* 
+					,NVL((SELECT FRAMESEQ FROM TB_LE_TREE_HIST Q WHERE Q.CUSERNO=#{SES_CUSERNO} AND Q.TREENO=A.TREENO),0) AS FRAMESEQ
+					, CASE
+						WHEN VIDEO_PROGRESS_VAL > 100
+						THEN 100
+						ELSE NVL(ROUND(VIDEO_PROGRESS_VAL,0),0)
+						END AS VIDEO_PERCENT
+				FROM
+					(
+				        SELECT 
+				            X.TREENO, 
+				            X.COURSENO, 
+				            X.SDAY, 
+				            X.SUBJECT, 
+				            X.SUBCNT,
+				            X.FRAMECNT,
+				            X.RUNTIME,
+				            X.FILE_PATH,
+				            X.TREE_FILE_PATH,
+				            X.START_FILE,
+				            Z.CUSERNO,
+				            Z.STUDYTIME,
+				            (FLOOR(Z.STUDYTIME / (60*60))) AS STUDYTIME_HH,
+				            LPAD(FLOOR(MOD((Z.STUDYTIME / 60),60)), 2 , 0) AS STUDYTIME_MM,
+				            LPAD(FLOOR(MOD(Z.STUDYTIME, 60)), 2 , 0) AS STUDYTIME_SS,
+				            Z.MOVSEC,
+				            Z.MT_PROG_STATUS_CODE,
+				            ROUND((Z.STUDYTIME * 0.1)/((X.RUNTIME*60) * 0.1)*100,2) AS VIDEO_PROGRESS_VAL,
+				           
+							 CASE WHEN X.FRAMECNT > 0 THEN  (
+								 	(SELECT 
+						                   C.FRAMESEQ
+						             FROM  TB_LE_TREE_HIST C   
+						             WHERE C.TREENO =X.TREENO  
+						             AND C.CUSERNO =  #{SES_CUSERNO} ) /(X.FRAMECNT)*100 )
+				        		ELSE 0 END AS AVG_FRAMSEQ
+				            , (
+				                   SELECT TO_CHAR(EDATE ,'YYYY-MM-DD hh24:mi:ss') AS EDATE 
+				                     FROM TB_LE_TREE_HIST C   
+				                    WHERE C.TREENO =X.TREENO  
+				                    AND C.CUSERNO =  #{SES_CUSERNO} 
+				                 ) AS EDATE
+				            , X.CON_HEIGHT
+				            , X.CON_WIDTH 
+				        FROM  TB_ED_COURSE_TREE X 
+                        		LEFT OUTER JOIN
+	                             (SELECT * FROM TB_LE_TREE_HIST WHERE CUSERNO = #{SES_CUSERNO} ) Z  ON X.TREENO = Z.TREENO  
+				        WHERE X.COURSENO = #{SES_COURSENO}  
+				        ORDER BY SDAY 
+					) A
+			) AA
+	</select>
+	
+	<!-- 학습정보 -->
+	<select id="getEduseqYnInfo" parameterType="dmap" resultType="emap">
+         SELECT 
+         	A.CONURL, A.DESCRIPTION, B.*, C.* 
+         FROM 
+			(SELECT CONURL, DESCRIPTION FROM TB_ED_COURSE WHERE COURSENO =  #{SES_COURSENO} ) A,
+   			(SELECT 
+   				EDUSEQ_YN, NVL(OPENTYPE, 'D')OPENTYPE
+   				, EXAM_PROG_PERCENT 
+   				, REVIEWDAY 
+   				, STUDY_SDATE
+				, STUDY_EDATE	
+				, SEQ_TITLE
+   			  FROM TB_ED_COURSE_SEQ WHERE CSEQNO = #{SES_CSEQNO} )B,
+   			(SELECT 
+		       CASE WHEN TO_CHAR(STARTDATE,'YYYYMMDD') <![CDATA[<=]]> TO_CHAR(SYSDATE,'YYYYMMDD') 		   
+		             AND TO_CHAR(ENDDATE,'YYYYMMDD') <![CDATA[>=]]> TO_CHAR(SYSDATE,'YYYYMMDD') 
+		       THEN 'Y'  
+		       ELSE 'N'  
+		       END AS STUDY_YN,
+		       CASE WHEN (TO_CHAR(ENDDATE ,'YYYYMMDD') <![CDATA[< ]]> TO_CHAR(SYSDATE,'YYYYMMDD')  
+		                OR TO_CHAR(ENDDATE+ (SELECT REVIEWDAY  FROM TB_ED_COURSE_SEQ WHERE CSEQNO = #{SES_CSEQNO} ) ,'YYYYMMDD') <![CDATA[>=]]> TO_CHAR(SYSDATE,'YYYYMMDD')) 
+		       THEN 'Y'  
+		       ELSE 'N'  
+		       END AS RE_STUDY_YN
+		       , NVL(ISPASS, 'N') ISPASS
+		       , STARTDATE, ENDDATE
+       		 FROM TB_LE_COURSE_USER 
+       		 WHERE CUSERNO = #{SES_CUSERNO} 
+       		) C
+	</select>
+	
+	<select id="getDateInfo" parameterType="dmap" resultType="emap">
+		SELECT 
+			CASE B.OPENTYPE 
+			WHEN 'A' THEN C.WDATE 
+			ELSE B.STUDY_SDATE END AS SDATE
+			, CASE B.OPENTYPE
+			WHEN 'A' THEN C.WDATE+B.EDUDAY+1
+			ELSE B.STUDY_EDATE+1 END AS EDATE
+		FROM TB_ED_COURSE_SEQ B, TB_LE_COURSE_USER C
+		WHERE C.CUSERNO=#{SES_CUSERNO}
+		AND B.CSEQNO=#{SES_CSEQNO}
+	</select>
+</mapper>
+
+

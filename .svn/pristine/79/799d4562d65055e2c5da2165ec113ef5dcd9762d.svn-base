@@ -1,0 +1,47 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ko">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<!-- <meta name="viewport" content="width=device-width, initial-scale=1">  -->
+<!-- <meta name="viewport" content="width=1000, user-scalable=yes" /> -->
+<meta name="viewport" content="width=device-width, maximum-scale=1.0, user-scalable=yes" />
+<title>jw test</title>
+
+<script type="text/javascript" src="./jwplayer-6/jquery-1.9.1.min.js"></script>
+<script type="text/javascript" src="./jwplayer-6/jwplayer.js"></script>
+<!-- <script type="text/javascript" src="./jwplayer-6/jwplayer.html5.js"></script> -->
+<!-- <script type="text/javascript" src="./jwplayer-7.12.2/jwplayer.controls.js"></script> -->
+<!-- <script type="text/javascript" src="https://content.jwplatform.com/libraries/snxE2103.js"></script> -->
+
+
+<script>
+
+
+$(document).ready(function(){
+
+
+	 jwplayer('player').setup({
+			file: "01.mp4",
+			//type: typeText,
+			//image: "images/bg.JPG",
+			//mute: false,
+			//primary: "html5",
+			//controls: true , //컨트롤바
+			//fallback : "flash",
+			width: "100%",
+			//height: "100", //_movHeight
+			autostart:true,
+			aspectratio:"16:9"
+	
+	});
+
+});
+
+</script>
+</head>
+<body>
+<div id="player">Loading the player...</div>
+
+</body>
+</html>

@@ -1,0 +1,266 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.webapp.common.mapper.CommonUserMapper">
+
+	<!-- 회원정보(통합회원코드기준)  -->
+	<select id="getUserInfo"  resultType="emap" parameterType="int">
+		SELECT
+            T1.UNITY_MBERNO AS USERNO
+            , T1.UNITY_ID AS USERID
+            , T1.MBERNM AS USERNAME 
+            , T1.EMAIL
+            , T1.MOBLPHON AS MOBILE  
+            , T1.MT_GRADE_CODE  
+            , GET_MTCODE_NAME(T1.MT_GRADE_CODE) MT_GRADE_NAME
+            , T2.NUM_CD MT_GRADE_NUM
+            
+        FROM
+            TB_CT_UNITY_MBER T1, TB_CD_MT_SUB T2
+        WHERE 1=1
+            AND T1.MT_GRADE_CODE = T2.MT_SUB_CODE
+			AND T1.USERNO = #{userNo}
+	</select>
+	
+	<!-- 회원정보(LMS회원코드기준)  -->
+	<select id="getUserLmsInfo"  resultType="emap" parameterType="dmap">
+		SELECT
+            T1.UNITY_MBERNO AS USERNO
+            , T1.UNITY_ID AS USERID
+            , T1.MBERNM AS USERNAME 
+            , T1.EMAIL
+            , T1.MOBLPHON AS MOBILE  
+            , T1.MT_GRADE_CODE  
+            , T1.BRTHDY
+            , T1.SESSION_ID
+            <if test="noMtSubCode == null">
+	            , T2.NUM_CD AS MT_GRADE_NUM
+    	    </if>
+            , (SELECT MT_SUB_NAME FROM TB_CD_MT_SUB T3 WHERE T3.MT_SUB_CODE = T1.MT_GRADE_CODE) MT_GRADE_NAME
+            , (SELECT STATUS_GB FROM TB_CT_COMPANY WHERE COMNO = T1.COMNO) AS STATUS_GB
+            <!-- , CASE
+            	WHEN NVL((SELECT COUNT(*) FROM TB_TT_MBER_MANAGE A WHERE A.USERNO = T1.UNITY_MBERNO ), 0) > 0
+            	THEN 'Y'
+            	ELSE 'N'
+            END TUTOR_AT -->
+        FROM
+            VW_TB_USERS T1
+            <if test="noMtSubCode == null">
+            , TB_CD_MT_SUB T2
+            </if>
+        WHERE 1=1
+	        <if test="noMtSubCode == null">
+		        AND T1.MT_GRADE_CODE = T2.MT_SUB_CODE
+    	    </if>
+            AND T1.UNITY_MBERNO = #{userNo}
+	</select>
+	
+	 <!-- 이메일 인증 승인 -->
+    <update id="updateAuthCodeInfo" parameterType="dmap">
+        UPDATE TB_CT_UNITY_MBER SET REG_AT = #{regAt}
+        <if test="authCode != null and authCode != ''">
+            , AUTH_CODE = #{authKey}
+        </if>
+        <if test="regUserId != null and regUserId != ''">
+            , UNITY_ID = #{regUserId}
+            , REG_DATE = SYSDATE
+            , EMAIL = #{email}
+        </if>
+        WHERE COMNO = #{comNo} 
+        AND REG_USERID IS NULL
+        AND UNITY_ID = #{regUserId}
+
+    </update>
+    
+	<!-- 로그인 회원정보 가져오기 -->
+	<select id="getLoginUserInfo"  resultType="emap" parameterType="dmap">
+		SELECT 
+             A.UNITY_MBERNO AS USERNO
+            , A.UNITY_ID AS USERID  
+            , A.COMNO
+            , UNITY_PASSWORD AS PWD 
+            , A.BIZNO                 
+            , A.MT_GRADE_CODE
+            , A.MT_JOB_KND_CODE
+            , A.SECSN_AT AS CANCEL_YN 
+            , A.MBERNM AS USERNAME
+            , (SELECT C.STATUS_GB FROM TB_CT_COMPANY C WHERE C.COMNO = A.COMNO) STATUS_GB
+            , NVL(LOGIN_FAIL_CNT, 0) AS LOGIN_FAIL_CNT
+            , REG_AT 
+            , A.KCB_DI
+            , A.KCB_AUTH_DATE
+            , CASE WHEN A.KCB_AUTH_DATE IS NULL
+            	   THEN 'N'
+                   ELSE 'Y'
+              END KCB_AUTH_YN
+        FROM TB_CT_UNITY_MBER A
+        WHERE UNITY_ID = #{userId}
+        AND SECSN_AT = 'N'
+	</select>
+	
+	
+	<!-- 
+	공통 > 개인정보조회이력관리  
+	-->
+	<insert id="insertMbrTransLog"  parameterType="dmap">
+		INSERT INTO TB_SY_TRANS_LOG (
+	          TRANS_SEQ
+			, SYS_GB
+			, TRANS_USERNO
+			, TRANS_USERID
+			, TRANS_USERNAME
+			, TRANS_IP
+			, TRANS_GB
+			, TRANS_DT
+			, SUMMARY
+			, PROG_ID
+			, PROG_NM
+    	) VALUES (
+          	  (SELECT NVL(MAX(TRANS_SEQ),0) + 1 FROM TB_SY_TRANS_LOG)
+	        , #{sysGb}
+	        , #{transUserNo}
+	        , #{transUserId}
+	        , #{transUserName}
+	        , #{transIp}
+	        , #{transGb}
+	        , SYSDATE
+	        , #{summary}
+	        , #{progId}
+	        , #{progNm}
+    	)
+	</insert>
+	
+	<!-- 
+	공통 > 로그인이력관리  
+	-->
+	<insert id="insertMbrLoginLog" parameterType="dmap">
+		INSERT INTO TB_SY_LOGIN_LOG (
+	          LOGIN_SEQ
+			, SYS_GB
+			, TRANS_USERNO
+			, TRANS_USERID
+			, TRANS_USERNAME
+			, TRANS_IP
+			, TRANS_GB
+			, TRANS_DT
+			, SUMMARY
+    	) VALUES (
+          	  (SELECT NVL(MAX(LOGIN_SEQ),0) + 1 FROM TB_SY_LOGIN_LOG)
+	        , #{sysGb}
+	        , #{transUserNo}
+	        , #{transUserId}
+	        , #{transUserName}
+	        , #{transIp}
+	        , #{transGb}
+	        , SYSDATE
+	        , #{summary}
+    	)
+	</insert>
+	
+	<!-- 사용자테이블 로그인 실패 횟수 업데이트 -->
+	<update id="updateLoginFailCntInfo" parameterType="dmap">
+		UPDATE TB_CT_UNITY_MBER SET 
+			LOGIN_FAIL_CNT = NVL( (SELECT LOGIN_FAIL_CNT FROM TB_CT_UNITY_MBER WHERE UNITY_ID = #{userId}) , 0) +1
+		WHERE UNITY_ID = #{userId}
+	</update>
+	
+	<!-- 회원 승인 대기로 변경 -->
+	<update id="updateRegAtInfo" parameterType="dmap">
+		UPDATE TB_CT_UNITY_MBER SET
+			REG_AT = 'P'
+	    WHERE UNITY_ID = #{userId}
+	    AND LOGIN_FAIL_CNT > 4
+	</update>
+	
+	<!-- 회원 승인 변경 -->
+	<update id="updateRegAtYesInfo" parameterType="dmap">
+	  	UPDATE TB_CT_UNITY_MBER SET 
+	  		REG_AT = 'Y'
+	  	WHERE UNITY_ID = #{userId}
+	</update>
+	
+	<!-- 로그인 성공 (실패횟수 0으로 초기화) -->
+	<update id="updateLoginSuccessInfo" parameterType="dmap">
+		UPDATE TB_CT_UNITY_MBER SET 
+			LOGIN_FAIL_CNT = 0
+			, LOGIN_DATE = SYSDATE
+		WHERE UNITY_ID = #{userId}
+	</update>
+	
+	<select id="selectLoginFailCntInfo"  resultType="emap" parameterType="dmap">
+		SELECT NVL(LOGIN_FAIL_CNT,0) AS LOGIN_FAIL_CNT
+		FROM TB_CT_UNITY_MBER
+		WHERE UNITY_ID = #{userId}
+	</select>
+	
+	<!-- 로그인 세션아이디 체크 -->
+	<select id="getLoginSessionInfo"  resultType="emap" parameterType="dmap">
+		SELECT
+			UNITY_MBERNO
+			, SESSION_ID
+			, LOGIN_DATE
+			, MBERNM
+		    , MT_GRADE_CODE
+		FROM
+			TB_CT_UNITY_MBER
+		WHERE UNITY_MBERNO = #{SES_USERNO}
+			AND UNITY_ID = #{SES_USERID}
+	</select>
+	
+	
+	<!-- 로그인 회원정보 가져오기 -->
+	<select id="getLoginUserList"  resultType="emap" parameterType="dmap">
+		SELECT 
+             UNITY_MBERNO AS USERNO
+            , UNITY_ID AS USERID 
+        FROM TB_CT_UNITY_MBER
+        ORDER BY UNITY_MBERNO ASC
+	</select>
+	  
+	  <!-- 로그인 회원정보 가져오기 -->
+	<select id="getCuserNo"  resultType="emap" parameterType="dmap">
+		SELECT CUSERNO FROM TB_LE_COURSE_USER WHERE USERNO=#{USERNO} AND CSEQNO=#{paramcSeqNo} AND USEYN='Y'
+	</select>
+	
+	  <!-- 설문 참여 이력 조회 -->
+	<select id="getPollHist"  resultType="emap" parameterType="dmap">
+		SELECT COUNT(*) AS POLL_CNT FROM TB_LE_POLL_APPLY WHERE POLLCSEQNO= #{pollcseqno} AND CUSERNO= #{cuserno}
+	</select>
+	
+	<!-- 비회원 로그인 정보 가져오기 -->
+	<select id="getNonMberLoginUserInfo"  resultType="emap" parameterType="dmap">
+		SELECT 
+            UNITY_MBERNO
+            , BRTHDY
+            , MBERNM
+            , MOBLPHON  
+            , REGNO
+            , REGDATE
+            , MT_GRADE_CODE
+            , MT_OFFICE_CODE
+            , UPDDE
+            , SECSN_AT    
+        FROM TB_CT_NONMBER
+        WHERE MBERNM = #{mbernm}
+        AND BRTHDY LIKE '%' || #{brthdy} 
+        AND MOBLPHON = #{moblphon}
+	</select>
+	
+	<!-- 세션아이디 저장 -->
+	<update id="updateJsessionId" parameterType="dmap">
+		UPDATE TB_CT_UNITY_MBER SET
+			 SESSION_ID = #{jessionId}
+		WHERE UNITY_ID = #{userId}
+	</update>
+	
+	<!-- 세션아이디 초기화 -->
+	<update id="deleteJsessionId" parameterType="dmap">
+		UPDATE TB_CT_UNITY_MBER SET
+			 SESSION_ID = NULL
+		WHERE UNITY_ID = #{SES_USERID}
+	</update>
+	<!-- 비회원 로그인 정보 가져오기 -->
+	<select id="getSessionId"  resultType="String" parameterType="String">
+		SELECT NVL(SESSION_ID,'empty') FROM TB_CT_UNITY_MBER WHERE UNITY_ID = #{loginId}
+	</select>
+</mapper>

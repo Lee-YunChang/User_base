@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.webapp.academy.mapper.MainMapper">
+
+
+	<select id="getMainCourseList" resultType="emap" parameterType="dmap"> 
+		SELECT
+			AA.*
+		FROM (
+			SELECT 
+				ROWNUM AS RNUM
+				, A.COURSETITLE
+	            , B.CSEQNO
+	            , B.COURSENO
+	            , B.SEQ
+	            , B.SEQ_TITLE
+	            , B.OPENTYPE
+	            , B.STUDYTIME
+	            , B.SHORT_DESCRIPTION
+	            , B.DESCRIPTION
+	            , B.SUBJECT
+	            , B.PROGRESS
+	            , B.TARGET
+	            , B.COMPLETION
+	            , B.EX_DESCRIPTION
+	            , B.PRICE
+	            , B.COMP_VAL
+	            , B.EVAL_ATTEND
+	            , TO_CHAR(B.APPLY_SDATE, 'YYYY-MM-DD') AS APPLY_SDATE
+	            , TO_CHAR(B.APPLY_EDATE, 'YYYY-MM-DD') AS APPLY_EDATE
+	            , TO_CHAR(B.STUDY_SDATE, 'YYYY-MM-DD') AS STUDY_SDATE
+	            , TO_CHAR(B.STUDY_EDATE, 'YYYY-MM-DD') AS STUDY_EDATE
+	         FROM TB_ED_COURSE A, TB_ED_COURSE_SEQ B
+	        WHERE A.USEYN = 'Y'
+	        AND A.COURSENO = B.COURSENO
+	        AND A.MT_CTYPE_CODE = #{mtCtypeCode}
+	        AND ( 
+	            ((B.OPENTYPE != 'A' AND A.MT_CTYPE_CODE = #{mtCtypeCode})
+	               AND TO_CHAR(SYSDATE,'YYYYMMDD') BETWEEN TO_CHAR(B.APPLY_SDATE,'YYYYMMDD') AND TO_CHAR(B.APPLY_EDATE,'YYYYMMDD')
+	            )
+	            OR (
+	               B.OPENTYPE = 'A' AND MT_CSEQ_STATUS_CODE <![CDATA[< ]]> #{mtCseqStatusEnd}
+	            )
+	        )
+	        ORDER BY B.COURSENO DESC, B.CSEQNO DESC
+        ) AA
+        WHERE RNUM BETWEEN 1 AND 2
+	</select> 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	<!--  
+	쿼리명 : 메인 수강 리스트(academy.user.course.getCourseSeqAppList)
+	설명 :  월별 교육중인 수강리스트를 조회한다.
+	
+	      수정일			수정자			 수정내용
+	==============================================================
+	2013-09-13			김민규			생성 / 질의 패턴 수정
+	-->
+	<select id="getMainCourseAppList" resultType="emap" parameterType="dmap"> 
+	   SELECT 
+	   		T1.* 
+	   FROM (
+			SELECT   
+				B.CSEQNO
+		       , A.COURSENO
+		       , B.OPENTYPE  <!--D(기간과정), A(상시운영)-->
+		       , B.EDUDAY <!--학습일수:이러닝 수시과정 사용-->
+		       , B.MT_CSEQ_STATUS_CODE
+		       , A.MT_CTYPE_CODE
+			   , GET_MTCODE_NAME(MT_CTYPE_CODE) AS MT_CTYPE_CODE_NM
+		       , B.SEQ_TITLE
+		       , B.APPLY_SDATE
+		       , B.APPLY_EDATE
+		       , B.STUDY_SDATE
+		       , B.STUDY_EDATE
+		       , CASE
+		     		 WHEN TO_CHAR (SYSDATE, 'YYYYMMDD')  <![CDATA[<]]>  TO_CHAR (B.APPLY_SDATE, 'YYYYMMDD')
+	                	 THEN 'OPEN'
+		             WHEN TO_CHAR (SYSDATE, 'YYYYMMDD') BETWEEN TO_CHAR (B.APPLY_SDATE, 'YYYYMMDD') AND TO_CHAR (B.APPLY_EDATE, 'YYYYMMDD')
+		                 THEN 'APPLY'
+		             WHEN TO_CHAR (SYSDATE, 'YYYYMMDD')  <![CDATA[>]]>  TO_CHAR (B.APPLY_EDATE, 'YYYYMMDD')
+		                 THEN 'END'
+		             ELSE 'N'
+		         END AS APPLY_YN
+		       , '' AS COMP_YN
+		    FROM TB_ED_COURSE A, TB_ED_COURSE_SEQ B
+			WHERE A.COURSENO = B.COURSENO
+			AND A.MT_CTYPE_CODE IN ('DAAA00', 'DAAA03') <!-- 일반과정만 추출 -->
+			AND B.MT_CSEQ_STATUS_CODE <![CDATA[<>]]>  'DEDA00' <!-- 온라인과정 폐강이 아닌과정만 추출--> 
+			UNION
+			
+			SELECT   
+                B.CSEQNO
+               , A.COURSENO
+               , B.OPENTYPE     <!--D(기간과정), A(상시운영)-->
+               , B.EDUDAY <!--학습일수:이러닝 수시과정 사용-->
+               , B.MT_CSEQ_STATUS_CODE
+               , A.MT_CTYPE_CODE
+               , GET_MTCODE_NAME(MT_CTYPE_CODE) AS MT_CTYPE_CODE_NM
+               , B.SEQ_TITLE
+               , B.APPLY_SDATE
+               , B.APPLY_EDATE
+               , B.STUDY_SDATE
+               , B.STUDY_EDATE
+               , CASE
+               		 WHEN MT_CSEQ_STATUS_CODE <![CDATA[<]]> 'DEAB00'   <!-- 예정 -->
+                    	 THEN 'OPEN'
+                     WHEN MT_CSEQ_STATUS_CODE = 'DEAB00'   <!-- 신청과정만 추출 -->
+                         THEN 'APPLY'
+                     WHEN MT_CSEQ_STATUS_CODE <![CDATA[>]]> 'DEAB00' <!-- 신청중인과정보다 상태가 크면 마감-->
+                         THEN 'END'
+                     ELSE 'N'
+                 END AS APPLY_YN
+               , '' AS COMP_YN
+            FROM TB_ED_COURSE A, TB_ED_COURSE_SEQ B
+			WHERE A.COURSENO = B.COURSENO
+            AND A.MT_CTYPE_CODE IN ('DAAA01') <!-- 여행사과정만 추출 -->
+            AND B.MT_CSEQ_STATUS_CODE <![CDATA[<>]]>  'DEDA00' <!-- 여행사과정 폐강이 아닌과정만 추출-->     
+	
+		) T1
+		WHERE 1=1
+		AND (TO_CHAR(T1.STUDY_SDATE, 'YYYYMM') = NVL(#{searchDay}, TO_CHAR(SYSDATE, 'YYYYMM')) 
+			OR (T1.MT_CTYPE_CODE = 'DAAA00' AND T1.OPENTYPE = 'A' AND T1.MT_CSEQ_STATUS_CODE <![CDATA[<]]> 'DECA00')
+			) <!--학습종료 이전상태-->
+	   
+        <if test="selectCtype != null and selectCtype != ''">
+	    	<if test="selectCtype != 'ALL'">
+                AND T1.MT_CTYPE_CODE = #{selectCtype}
+	    	</if>
+		</if>
+		
+        <if test="selectApplyYn != null and selectApplyYn != ''">
+            <if test="selectApplyYn != 'APPLY'">
+                AND T1.APPLY_YN = #{selectApplyYn}
+            </if>
+            <if test="selectApplyYn == 'APPLY'">
+                AND T1.APPLY_YN = #{selectApplyYn} OR T1.APPLY_YN = 'N'
+            </if>
+		</if>
+		 
+		<if test="searchKeyword != null and searchKeyword != ''">
+	    AND T1.SEQ_TITLE LIKE '%'|| #{searchKeyword} ||'%'
+		</if>
+	    
+	    ORDER BY T1.STUDY_SDATE
+	</select>
+
+
+
+
+	<select id="getMainDateList" resultType="emap" parameterType="dmap">
+		SELECT 
+            TO_CHAR(ADD_MONTHS(SYSDATE,-2),'YYYYMM') AS PRE_DAY2
+            , TO_CHAR(ADD_MONTHS(SYSDATE,-1),'YYYYMM')  AS PRE_DAY1
+            , TO_CHAR(SYSDATE,'YYYYMM') AS  TO_DAY
+            , TO_CHAR(ADD_MONTHS(SYSDATE,+1),'YYYYMM') AS NEXT_DAY1
+            , TO_CHAR(ADD_MONTHS(SYSDATE,+2),'YYYYMM') AS NEXT_DAY2
+        FROM DUAL
+	</select>
+
+</mapper>

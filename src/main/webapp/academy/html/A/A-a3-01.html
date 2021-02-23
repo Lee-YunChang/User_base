@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="ko">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>간편로그인</title>
+        <link rel="stylesheet" href="../../common/css/style.css">
+        <link rel="stylesheet" href="../../common/fonts/font.css">
+        <link rel="stylesheet" href="../../common/css/bootstrap_jy.css">
+        <script type="text/javascript" src="http://code.jquery.com/jquery-3.2.1.min.js"></script>
+        <script type="text/javascript" src="../../common/js/jquery.bxslider.min.js"></script>
+        <script type="text/javascript" src="../../common/js/bootstrap.min.js"></script>
+        <script type="text/javascript" src="../../common/js/ui.js"></script>
+        <!-- <script type="text/javascript" src="../../common/js/jquery.simple-sidebar.min.js"></script> -->
+        <script type="text/javascript" src="../../common/js/ui.js"></script>
+
+    </head>
+    <body>
+        <a href="#Subcontent" class="sr-only sr-only-focusable">콘텐츠로 바로가기</a>
+        <div id="Wrapper">
+            <header>
+                <div class="semin_header">
+                    <!-- Navigation -->
+                    <nav class="navbar navbar-default" role="navigation">
+                        <!-- Brand and toggle get grouped for better mobile display -->
+                        <div class="globalWrap clearfix">
+                            <div class="container center-block">
+                            <a class="navbar-brand" href="#"><div class="logo"><span class="text-hide">서민금융진흥원</span></div></a>
+
+                                <div class="navbar-header">
+                                    <div class="nav navbar-right top-nav">
+                                        <!--login
+                                        <span class="top_global">
+                                            <a href="#" class="a_join">회원가입</a>
+                                            <a href="#" class="a_idpw">id/pw 찾기</a>
+                                        </span>
+
+                                        <a href="" class="btn_login"><span>로그인</span></a>
+                                        <!-- //login-->
+                                        <!-- logout-->
+                                        <span class="top_global">
+                                            <a href="#" class="a_lecture">강사공간</a>
+                                            <a href="#" class="a_mypage">나의공간</a>
+                                        </span>
+
+                                        <a href="" class="btn_login Out"><span>로그아웃</span></a>
+                                        <!-- //logout-->
+                                        <a href="" class="btn_sitemap"><span class="text-hide">전체메뉴</span></a>
+                                        <button type="button" class="navbar-toggle" id="btn-sidebar">
+                                            <span class="sr-only">전체메뉴</span>
+                                            <span class="icon-bar"></span>
+                                            <span class="icon-bar"></span>
+                                            <span class="icon-bar"></span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+
+                        <div class="gnbposi">
+                            <div class="seominGnbWrap">
+                                <div class="container center-block">
+                                    <div class="formobile" id="main-sidebar">
+                                        <div class="mGnbTop">
+                                            <span class="mGnb_tit">전체메뉴</span>
+                                        </div>
+
+                                        <ul class="ul_gnb">
+                                            <li>
+                                                <a href="#none" class="a_1dep">교육체계</a>
+                                                <div class="subMnWrap">
+                                                    <ul>
+                                                        <li><a href="" class="a_2dep">교육체계</a></li>
+                                                        <li><a href="" class="a_2dep">교육센터 소개</a></li>
+                                                        <li><a href="" class="a_2dep">오시는 길</a></li>
+                                                    </ul>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <a href="#none" class="a_1dep">교육신청</a>
+                                                <div class="subMnWrap">
+                                                    <ul>
+                                                        <li><a href="" class="a_2dep">금융상담직원교육 소개</a></li>
+                                                        <li><a href="" class="a_2dep">온라인교육</a></li>
+                                                        <li><a href="" class="a_2dep">집합교육</a></li>
+                                                    </ul>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <a href="#none" class="a_1dep">지식공간</a>
+                                                <div class="subMnWrap">
+                                                    <ul>
+                                                        <li><a href="" class="a_2dep">일반교육 소개</a></li>
+                                                        <li><a href="" class="a_2dep">온라인교육</a></li>
+                                                        <li><a href="" class="a_2dep">집합교육</a></li>
+                                                    </ul>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <a href="#none" class="a_1dep">안내공간</a>
+                                                <div class="subMnWrap">
+                                                    <ul>
+                                                        <li><a href="" class="a_2dep">공지사항</a></li>
+                                                        <li><a href="" class="a_2dep">교육안내</a></li>
+                                                        <li><a href="" class="a_2dep">자주묻는 질문</a></li>
+                                                        <li><a href="" class="a_2dep">교육일정표</a></li>
+                                                    </ul>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <a href="#none" class="a_1dep">나의강의실</a>
+                                                <div class="subMnWrap">
+                                                    <ul>
+                                                        <li><a href="" class="a_2dep">강의실 홈</a></li>
+                                                        <li><a href="" class="a_2dep">온라인학습</a></li>
+                                                        <li><a href="" class="a_2dep">시험</a></li>
+                                                        <li><a href="" class="a_2dep">설문</a></li>
+                                                        <li><a href="" class="a_2dep">공지사항</a></li>
+                                                        <li><a href="" class="a_2dep">자료실</a></li>
+                                                    </ul>
+                                                </div>
+                                            </li>
+                                        </ul>
+                                        <button type="button" class="menuClose"><span class="text-hide">전체메뉴닫기</span></button>
+                                    </div>
+
+
+                                </div>
+                            </div>
+                        </div>
+                    </nav>
+                </div>
+
+            </header>
+            <!-- content -->
+            <div class="container" id="Subcontent">
+                <article class="subArea">
+                    <div class="subCntWrap">
+                        <div class="leftMn">
+                            <h1 class="ltTitle">
+                                <span class="bold">종사자교육</span>
+                            </h1>
+                            <nav>
+                                <ul class="leftNavi">
+                                    <li><a href="">상담종사자교육 소개</a></li>
+                                    <li><a href="">사이버교육</a></li>
+                                    <li><a href="" class="active">집합교육</a></li>
+                                </ul>
+                            </nav>
+                        </div>
+                        <div class="subConts">
+                            <section class="contTop">
+                                <div class="path">
+                                    <ul>
+                                        <li><span class="home text-hide">홈</span></li>
+                                        <li>로그인</li>
+                                        <li class="active">ID/PW 찾기</li>
+                                    </ul>
+                                </div>
+                                <h2 class="h2_tit">ID/PW 찾기</h2>
+                            </section>
+
+                            <section>
+                                <div class="bluelineTabWrap">
+                                    <ul class="bluelineTab">
+                                        <li><a href="#">ID찾기</a></li>
+                                        <li class="active"><a href="#">PW찾기</a></li>
+                                    </ul>
+                                </div>
+                            </section>
+
+                            <hr>
+
+                            <section>
+                                <div class="borBoxW3">
+                                    <p clas="po_C7"> 아이디&amp;비밀번호 찾기는 <strong class="po_C4">회원가입 시 사용한 인증방식</strong>으로 조회 가능합니다.</p>
+                                </div>
+                            </section>
+
+                            <hr>
+
+                            <section class="tableBox">
+                                <h3 class="main_tit">PW 찾기</h3>
+                                <form>
+                                    <fieldset>
+                                        <legend>개인정보입력(이름,법정생년월일,휴대전화번호 및 인증)</legend>
+                                        <div class="tblWrap">
+                                            <table class="writeForm">
+                                                <caption>간편로그인개인정보입력</caption>
+                                                <colgroup>
+                                                    <col style="width:25%">
+                                                    <col style="width:*">
+                                                </colgroup>
+                                                <tbody>
+                                                    <tr>
+                                                        <th scope="row"><span class="po_C2">*</span> 가입인증</th>
+                                                        <td>
+                                                            <label class="radio-inline">
+                                                                <input type="radio" name="jointerm" id="">
+                                                                휴대폰 인증
+                                                            </label>
+                                                            <label class="radio-inline">
+                                                                <input type="radio" name="jointerm" id="">
+                                                                이메일 인증
+                                                            </label>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th scope="row"><span class="po_C2">*</span> <label for="member_name">이름</label></th>
+                                                        <td>
+                                                            <div class="form-inline">
+                                                                <div class="form-group">
+                                                                    <input type="text" class="form-control" id="member_name">
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+
+                                                    <tr>
+                                                        <th scope="row"><span class="po_C2">*</span> <label for="user_phone">인증번호 발송</label></th>
+                                                        <td>
+                                                            <div class="form-inline phoneNum">
+                                                                <div class="form-group w20">
+                                                                    <select class="form-control" name="" id="user_phone" title="휴대폰번호 첫째자리">
+                                                                        <option value="">010</option>
+                                                                    </select>
+                                                                </div>
+                                                                <div class="form-group w20">
+                                                                    <input type="text" class="form-control" title="휴대폰번호 둘째자리">
+                                                                </div>
+                                                                <div class="form-group w20">
+                                                                    <input type="text" class="form-control" title="휴대폰번호 셋째자리">
+                                                                </div>
+                                                                <button type="button" class="btn btn-orange btn-sm">인증번호 발송</button>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th scope="row"><span class="po_C2">*</span> <label for="user_phoneConfirm">인증번호 확인</label></th>
+                                                        <td>
+                                                            <div class="form-inline">
+                                                                <div class="form-group">
+                                                                    <input type="text" class="form-control" id="user_phoneConfirm">
+                                                                </div>
+                                                                <button type="button" class="btn btn-drkblue btn-sm">확인</button>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+
+                                    </fieldset>
+                                </form>
+
+                                <hr>
+
+                                <div class="btnAreaC">
+                                    <button type="button" name="button" class="btn btn-lg btn-blue w130">조회</button>
+                                </div>
+                            </section>
+
+
+                            <section class="mrg_t30">
+                                <div class="idwpMsg">
+                                    <p class="bold fnt16 po_C9">회원님의 아이디는 <span class="po_C4">sangs1</span> 입니다.</p>
+                                </div>
+
+                                <div class="btnAreaC mrg_t30">
+                                    <button type="button" name="button" class="btn btn-lg btn-blue2">로그인 바로가기</button>
+                                </div>
+                            </section>
+
+                        </div>
+                    </div>
+                </article>
+            </div>
+            <!--// content -->
+            <footer>
+                <div class="footerWrap">
+                    <section class="footerTop">
+                        <div class="container">
+                            <div class="inner">
+                                <ul>
+                                    <li class="li_bar"><a href="">이용약관</a></li>
+                                    <li class="li_bar"><a href="" class="po_C5 bold">개인정보 처리방침</a></li>
+                                    <li class="li_bar"><a href="">저작권 보호방침</a></li>
+                                    <li class="li_bar"><a href="">이메일주소 무단수집거부</a></li>
+                                </ul>
+                                <div class="dropup dropsitelink">
+                                    <button class="btn btn-default dropdown-toggle" type="button" id="dropsiteGo" data-toggle="dropdown" aria-expanded="true">관련사이트바로가기
+                                        <span class="drop_arr_up"></span>
+                                    </button>
+                                    <ul class="dropdown-menu" role="menu" aria-labelledby="dropsiteGo">
+                                        <li role="presentation"><a role="menuitem" tabindex="-1" href="#">관련사이트1</a></li>
+                                        <li role="presentation"><a role="menuitem" tabindex="-1" href="#">관련사이트2</a></li>
+                                        <li role="presentation"><a role="menuitem" tabindex="-1" href="#">관련사이트3</a></li>
+                                        <li role="presentation"><a role="menuitem" tabindex="-1" href="#">관련사이트4</a></li>
+                                        <li role="presentation"><a role="menuitem" tabindex="-1" href="#">관련사이트1</a></li>
+                                        <li role="presentation"><a role="menuitem" tabindex="-1" href="#">관련사이트2</a></li>
+                                        <li role="presentation"><a role="menuitem" tabindex="-1" href="#">관련사이트3</a></li>
+                                        <li role="presentation"><a role="menuitem" tabindex="-1" href="#">관련사이트4</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                        </div>
+                    </section>
+                    <section class="footerBot">
+                        <div class="container">
+                            <ul class="clearfix">
+                                <li class="li_bar">04520 서울시 중구 세종대로 124 프레스센터 4층, 5층</li>
+                                <li class="li_bar">서민금융통합콜센터 1397 (1644-1110, 1544-4005)</li>
+                            </ul>
+                            <p class="copyr">Copyright Since 2016 Korea Inclusive Finance Agency. All Rights Reserved.</p>
+                        </div>
+                    </section>
+                </div>
+            </footer>
+
+            <div class="dimed"></div>
+        </div>
+
+
+
+    </body>
+</html>

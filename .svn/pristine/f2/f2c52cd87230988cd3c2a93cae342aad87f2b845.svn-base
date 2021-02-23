@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>수료확인서</title>
+    <link rel="stylesheet" href="../../common/css/style.css">
+    <link rel="stylesheet" href="../../common/fonts/font.css">
+    <link rel="stylesheet" href="../../common/css/bootstrap_jy.css">
+</head>
+    <body>
+        <div class="print_Certi">
+            <div class="certi_top"></div>
+            <div class="certi_mid">
+                <div class="certi_cont">
+                    <p><img src="../../images/common/certifi_tit.png" alt="수료확인서"></p>
+                    <div class="dl_certi_nm">
+                        <dl class="dl_certi">
+                            <dt><img src="../../images/common/certifi_name.png" alt="성명"></dt>
+                            <dd><span>홍길동</span></dd>
+                        </dl>
+
+                        <dl class="dl_certi">
+                            <dt><img src="../../images/common/certifi_birth.png" alt="생일"></dt>
+                            <dd><span>880806</span></dd>
+                        </dl>
+                    </div>
+                    <p class="dl_certi_txt">
+                        <img src="../../images/common/certifi_txt.png" alt="위 사람은 창업자급대출 의무교육을 모두 수료하였습니다.">
+                    </p>
+                </div>
+
+                <div class="tblWrap certiTbl">
+                    <table class="dataTbl text-center">
+                        <caption>수료과정 목록</caption>
+                        <colgroup>
+                            <col style="width:26%">
+                            <col style="width:*">
+                            <col style="width:20%">
+                            <col style="width:12%">
+                        </colgroup>
+                        <thead>
+                            <tr>
+                                <th scope="col">과정구분</th>
+                                <th scope="col">과정명</th>
+                                <th scope="col">수료일</th>
+                                <th scope="col">시간</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>창업</td>
+                                <td>창업의 이해</td>
+                                <td>2017.03.04</td>
+                                <td>3</td>
+                            </tr>
+                            <tr>
+                                <td>창업</td>
+                                <td>창업의 이해</td>
+                                <td>2017.03.04</td>
+                                <td>3</td>
+                            </tr>
+                            <!-- <tr>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr> -->
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <th scope="row" colspan="3" class="bgfoot">총 합계</th>
+                                <td></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+                <div clas="certi_sign">
+                    <p class="ymd">2016년 4월 6일</p>
+                    <p class="text-center mrg_t15"><img src="../../images/common/certifi_from.png" alt="서민금융진흥원"></p>
+                </div>
+            </div>
+            <div class="certi_bot"></div>
+        </div>
+    </body>
+</html>

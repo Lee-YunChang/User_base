@@ -1,0 +1,591 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 클래스데스크 > 학생 > 시험관련 -->
+<mapper namespace="com.webapp.classdesk.mapper.ClassdeskUserExamMapper">
+	<resultMap id="clobMap" type="emap">
+		<result property="ANSWER" column="ANSWER" jdbcType="CLOB" javaType="java.lang.String"/>
+	</resultMap>
+	
+	<resultMap id="clobBinderMap" type="emap">
+		<result property="ANSWER" column="ANSWER" jdbcType="CLOB" javaType="java.lang.String"/>
+	</resultMap> 
+	
+	<resultMap id="clobRdmMap" type="emap">
+		<result property="ANSWER" column="ANSWER" jdbcType="CLOB" javaType="java.lang.String"/>
+	</resultMap> 
+	
+	<!-- 시험 리스트 -->
+	<select id="getUserLectExamList" parameterType="dmap" resultType="emap" >
+		SELECT * 
+          FROM (
+                SELECT
+        			ROW_NUMBER() OVER (ORDER BY A.EXAMNO ASC) RNUM
+        			, CASE WHEN (SELECT COUNT(1) FROM TB_LE_EXAM_SECTION WHERE EXAMNO = A.EXAMNO) <![CDATA[>]]> 0 THEN 'Y'
+        	          ELSE 'N'
+        	          END AS RANDOM_YN
+        			, A.EXAMNO
+        			, A.CSEQNO
+        			, A.EXAM_TYPE
+        			, DECODE(A.EXAM_TYPE, 'M', '중간', 'F', '최종') AS EXAM_TYPE_NM
+        			, A.TITLE
+        			, A.SUMMARY
+        			, TO_CHAR(A.EDATE, 'yyyy-mm-dd') EDATE
+        			, TO_CHAR(A.SDATE, 'yyyy-mm-dd') SDATE 
+        			, A.EVAL
+        			, A.EXAM_TIME
+        			, A.PUB_TYPE
+        			, A.SETNO
+        			, A.OPENYN
+        			, A.RESULTYN
+        			, A.USEYN    
+        			, (SELECT COUNT(1) FROM TB_LE_EXAM_APPLY WHERE EXAMNO = A.EXAMNO AND OPENYN = 'Y') AS SCNT
+        			, (SELECT COUNT(1) FROM TB_LE_COURSE_USER WHERE CSEQNO = A.CSEQNO) AS TOTCNT
+        			, CASE
+                        WHEN TO_CHAR(EDATE,'YYYYMMDD')  <![CDATA[<]]> TO_CHAR(SYSDATE,'YYYYMMDD') THEN 'Y' 
+                        ELSE 'N'
+                     END AS ENDYN 
+                    , (SELECT CUSERNO AS CUSERNO FROM TB_LE_EXAM_APPLY WHERE EXAMNO = A.EXAMNO AND CUSERNO = #{SES_CUSERNO}) AS CUSERNO
+        			, (SELECT EXAM_SDATE FROM TB_LE_EXAM_APPLY WHERE EXAMNO = A.EXAMNO AND CUSERNO = #{SES_CUSERNO}) AS EXAM_SDATE
+        			, (SELECT SUBMITYN AS USER_SUBMITYN FROM TB_LE_EXAM_APPLY WHERE EXAMNO = A.EXAMNO AND CUSERNO = #{SES_CUSERNO}) AS USER_SUBMITYN
+        			, CASE 
+        		        WHEN TO_CHAR(SDATE,'YYYYMMDD HH24:MI:SS')  <![CDATA[<=]]>   TO_CHAR(SYSDATE,'YYYYMMDD HH24:MI:SS') 
+        		        	AND TO_CHAR(EDATE,'YYYYMMDD HH24:MI:SS')  <![CDATA[>=]]> TO_CHAR(SYSDATE,'YYYYMMDD HH24:MI:SS') THEN 'Y' <!-- 시험 응시기간내에 응시가능 유무 -->
+        		        ELSE 'N'
+        		      END AS SAVEYN 
+        		    , (SELECT CASE WHEN VAL > A.EVAL THEN A.EVAL ELSE VAL END FROM TB_LE_EXAM_APPLY WHERE EXAMNO = A.EXAMNO AND CUSERNO = #{SES_CUSERNO}) AS SCORE 
+        		FROM TB_LE_EXAM A
+        		WHERE A.CSEQNO = #{SES_CSEQNO}
+        		AND   A.OPENYN = 'Y'
+        		ORDER BY EXAMNO ASC
+               ) B,
+               (    
+                SELECT CASE
+                           WHEN TO_CHAR(ENDDATE,   'YYYYMMDD') <![CDATA[<]]> TO_CHAR(SYSDATE,'YYYYMMDD') THEN 'Y'
+                           ELSE 'N'
+                       END AS OPEN_A_ENDYN, 
+                       CASE 
+                           WHEN TO_CHAR(STARTDATE, 'YYYYMMDD') <![CDATA[<=]]> TO_CHAR(SYSDATE,'YYYYMMDD') AND TO_CHAR(ENDDATE,'YYYYMMDD') <![CDATA[>=]]> TO_CHAR(SYSDATE,'YYYYMMDD') THEN 'Y'
+                           ELSE 'N'
+                       END AS OPEN_A_SAVEYN  
+                  FROM TB_LE_COURSE_USER 
+                 WHERE CUSERNO = #{SES_CUSERNO}
+               ) C
+	</select>
+	
+	
+	
+	<select id="getUserLectExamAppCnt" parameterType="dmap" resultType="emap">
+		SELECT 
+			COUNT(1) AS EXAM_APP_CNT
+		FROM TB_LE_EXAM_APPLY A, TB_LE_EXAM_HIST B
+		WHERE  A.CUSERNO = B.CUSERNO
+		AND    A.EXAMNO = B.EXAMNO
+		AND    A.CUSERNO = #{SES_CUSERNO}
+		AND    A.EXAMNO =  #{examNo}
+	
+	</select>
+	
+	
+	
+	<!-- 강의실 시험 응시내역 저장 -->
+	<insert id="insertLectExamApp" parameterType="dmap" >
+    	 INSERT INTO TB_LE_EXAM_APPLY(
+    	 		 CUSERNO
+    	 		 , EXAMNO
+    	 		 , EXAM_SDATE
+    	 		 , EXAM_EDATE
+    	 		 , EXAM_TIME
+    	 		 , SUBMITYN
+    	 		 , ISPASS
+    	 		 , COURSENO
+    	 		 , CSEQNO
+    	 		 , USERNO
+    	 		)
+      	  VALUES(
+    	  		   #{SES_CUSERNO}
+   	  			 , #{examNo} 
+   	  			 , SYSDATE
+   	  			 , TO_DATE(#{examEdate},'YYYY-MM-DD')
+   	  			 , #{examTime}
+   	  			 , #{submitYn}
+   	  			 , #{isPass}
+   	  			 , #{SES_COURSENO}
+   	  			 , #{SES_CSEQNO}
+   	  			 , #{SES_USERNO}
+    	  		)
+
+	</insert>
+	
+	
+	<insert id="insertUserLectExamSetAppHst" parameterType="dmap">
+		 INSERT INTO TB_LE_EXAM_HIST(
+    	 		 CUSERNO
+    	 		 , QSEQ
+    	 		 , EXAMNO
+    	 		 , QNO
+    	 		)
+      	 	VALUES(
+    	  		   #{SES_CUSERNO}
+    	  		   , #{qseq}
+   	  			   , #{examNo} 
+   	  			   , #{qNo}
+    	  		)
+	</insert>  
+	
+	<insert id="insertUserLectExamBinderAppHst" parameterType="dmap">
+		 INSERT INTO TB_LE_EXAM_HIST(
+    	 		 CUSERNO
+    	 		 , QSEQ
+    	 		 , EXAMNO
+    	 		 , QNO
+    	 		)
+      	 	VALUES(
+    	  		   #{SES_CUSERNO}
+    	  		   , #{qseq}
+   	  			   , #{examNo} 
+   	  			   , #{qNo}
+    	  		)
+	</insert>  
+	
+	
+	<select id="getUserLectExamAppMaxSeq" parameterType="dmap" resultType="emap">
+		SELECT 
+			NVL(MAX(QSEQ)+1, 1) AS MAX_NO
+		FROM TB_LE_EXAM_APPLY A, TB_LE_EXAM_HIST B
+		WHERE  A.CUSERNO = B.CUSERNO
+		AND    A.EXAMNO = B.EXAMNO
+		AND    A.CUSERNO = #{SES_CUSERNO}
+		AND    A.EXAMNO =  #{examNo}
+	</select>
+	
+	<!-- 응답 문항 수 validation -->
+    <select id="getItemCnt" parameterType="dmap" resultType="int">
+    	/* getItemCnt */
+   		SELECT 
+			COUNT(*) AS ITEMCNT
+		FROM 
+			TB_LE_EXAM_QUIZ A
+		WHERE A.EXAMNO =  #{examNo}
+		AND QTYPE IN (1,2)
+    </select>
+    
+	<!-- 수강생 시험 랜덤 리스트 -->
+	<select id="getUserLectExamRdmAppHistList" resultMap="clobRdmMap" parameterType="dmap">
+		/* getUserLectExamRdmAppHistList */
+		SELECT 
+		    D.QNO
+		    , D.QTYPE
+		    , D.FILE_PATH
+		    , D.QSUBJECT
+		    , D.QSUBJECT_FILE
+		    , D.A01
+		    , D.A01_FILE
+		    , D.A02
+		    , D.A02_FILE
+		    , D.A03
+		    , D.A03_FILE
+		    , D.A04
+		    , D.A04_FILE
+		    , D.A05
+		    , D.A05_FILE
+		    , D.RCODE
+		    , D.RTEXT
+		    , D.SUMMARY
+		    , D.WDATE
+		    , D.WRITER
+		    , D.USEYN
+		    , D.COURSENO
+		    , D.SECNO
+		    , C.CUSERNO
+            , C.QSEQ
+            , C.ITEMSEQ
+            , DECODE(C.ITEMSEQ, '1', 'O', '2', 'X') AS ITEMSEQ_OX
+		    , C.ANSWER
+		    , C.ISRIGHT
+		    , B.VAL AS SUM_VAL
+		    , C.VAL
+		    , A.PUB_TYPE
+		    , A.TITLE
+		    , A.EXAMNO
+		    , A.EXAM_TIME
+		    , A.EXAM_TIME*60 AS EXAM_TIME_MS
+		    , B.EXAM_TIME AS USER_EXAM_TIME
+		    , F.UNITY_ID
+		    , F.MBERNM
+		    , DECODE(A.EXAM_TYPE, 'M', '중간', 'F', '최종') AS EXAM_TYPE_NM
+		    , A.EVAL
+		    , G.ALLOT   /* 정답 배점 */
+		FROM TB_LE_EXAM A, TB_LE_EXAM_APPLY B, TB_LE_EXAM_HIST C, TB_LE_EXAM_QUIZ D , TB_CT_UNITY_MBER F, TB_LE_EXAM_SECTION G
+		WHERE 1=1
+		AND A.EXAMNO = B.EXAMNO 
+		AND B.EXAMNO = C.EXAMNO 
+		AND B.CUSERNO = C.CUSERNO                                                        
+        AND B.USERNO = F.UNITY_MBERNO
+		AND C.QNO = D.QNO 
+		AND G.EXAMNO = D.EXAMNO 
+		AND G.SECNO = D.SECNO
+		AND D.USEYN = 'Y'
+		AND G.USEYN = 'Y'
+		AND A.EXAMNO = #{examNo}
+		AND D.EXAMNO = #{examNo}
+		AND B.CSEQNO = #{SES_CSEQNO}
+		AND B.CUSERNO = #{cUserNo}
+		ORDER BY D.QNO
+	</select>
+	
+	<select id="getUserLectExamRdmAppHistListB" resultMap="clobRdmMap" parameterType="dmap">
+		SELECT 
+			 A.CUSERNO
+			,A.EXAMNO
+			,A.EXAM_SDATE
+			,A.EXAM_EDATE
+			,A.EXAM_TIME
+			,A.SUBMITYN
+			,A.ISPASS
+			,A.VAL_DATE
+			,A.VAL
+			,A.VAL_CMT
+			,A.COURSENO
+			,A.CSEQNO
+			,A.USERNO
+			,A.USERID
+			,A.USERNAME
+			,(SELECT COUNT(*) FROM TB_LE_EXAM_HIST WHERE EXAMNO = A.EXAMNO AND CUSERNO = #{SES_CUSERNO} AND ISRIGHT = 'Y') AS VAL_CNT
+		 	FROM TB_LE_EXAM_APPLY A
+			WHERE CUSERNO = #{SES_CUSERNO}
+			AND USERNO = #{SES_USERNO}
+	</select>
+<!-- 		SELECT 
+			*
+		 	FROM TB_LE_EXAM_APPLY
+			WHERE CUSERNO = #{SES_CSEQNO}
+			AND CUSERNO = #{cUserNo}  -->
+	
+	<!-- <sql id="selectItem_fragment">
+	 		ROWNUM AS RNUM
+		   , A.QNO
+		   , A.QTYPE
+		   , A.FILE_PATH
+		   , A.QSUBJECT
+		   , A.QSUBJECT_FILE
+		   , A.A01
+		   , A.A01_FILE
+		   , A.A02
+		   , A.A02_FILE
+		   , A.A03
+		   , A.A03_FILE
+		   , A.A04
+		   , A.A04_FILE
+		   , A.A05
+		   , A.A05_FILE
+		   , A.RCODE
+		   , A.SUMMARY
+		   , A.WDATE
+		   , A.WRITER
+		   , A.USEYN
+		   , A.COURSENO
+		   , A.SECNO
+		   , A.RTEXT
+		   , (SELECT SECTITLE FROM TB_ED_EXAM_SECTION WHERE SECNO = A.SECNO AND COURSENO = #{SES_COURSENO}) SECTITLE  
+	</sql>
+	
+	<select id="getUserLectExamRdmAppHistList" resultMap="clobRdmMap" parameterType="dmap">
+		SELECT 
+			 <include refid="selectItem_fragment"/>
+		FROM TB_LE_EXAM_QUIZ A
+		WHERE COURSENO = #{SES_COURSENO}
+		AND EXAMNO = #{examNo}
+		<if test="secNo != null and secNo != ''">
+			  AND SECNO = #{secNo}		
+		</if>
+		<if test="searchSecno != null and searchSecno != ''">
+			  AND SECNO = #{searchSecno}		
+		</if>
+		<if test="searchQtype != null and searchQtype != ''">
+			  AND QTYPE = #{searchQtype}	
+		</if>
+		<if test="qsubject != null and qsubject != ''">  AND A.QSUBJECT LIKE '%'|| #{qsubject}||'%' </if>
+		ORDER BY QNO DESC
+	</select>
+	 -->
+	
+	<!-- 수강생 시험 세트 리스트 -->
+	<select id="getUserLectExamSetAppHistList" resultMap="clobMap" parameterType="dmap">
+		/* getUserLectExamSetAppHistList */
+		SELECT 
+            D.*
+            , C.CUSERNO
+            , C.QSEQ
+            , C.ITEMSEQ
+            , DECODE(C.ITEMSEQ, '1', 'O', '2', 'X') AS ITEMSEQ_OX
+            , C.ANSWER
+            , C.ISRIGHT
+            , B.VAL AS SUM_VAL
+            , C.VAL
+            , A.PUB_TYPE
+            , A.TITLE
+            , A.EXAMNO
+            , A.EXAM_TIME
+            , A.EXAM_TIME*60 AS EXAM_TIME_MS
+            , B.EXAM_TIME AS USER_EXAM_TIME
+            , E.UNITY_ID
+		    , E.MBERNM
+            , DECODE(A.EXAM_TYPE, 'M', '중간', 'F', '최종') AS EXAM_TYPE_NM
+            , A.EVAL
+            , D.ALLOT
+        FROM TB_LE_EXAM A, TB_LE_EXAM_APPLY B, TB_LE_EXAM_HIST C, TB_LE_EXAM_SQUIZ D, TB_CT_UNITY_MBER E
+        WHERE 1=1
+        AND A.EXAMNO = B.EXAMNO 
+        AND B.EXAMNO = C.EXAMNO 
+        AND B.CUSERNO = C.CUSERNO
+        AND C.QNO = D.QNO
+        AND B.USERNO = E.UNITY_MBERNO
+		AND A.EXAMNO = #{examNo}
+		AND B.CSEQNO = #{SES_CSEQNO}
+		AND B.CUSERNO = #{cUserNo}
+		AND D.USEYN = 'Y'
+		ORDER BY C.QSEQ
+	</select>
+
+	<!-- 수강생 시험 바인더 리스트 -->
+	<select id="getUserLectExamBinderAppHistList" resultMap="clobBinderMap" parameterType="dmap">
+		/* getUserLectExamBinderAppHistList */
+		SELECT 
+            D.*
+            , C.CUSERNO
+            , C.QSEQ
+            , C.ITEMSEQ
+            , DECODE(C.ITEMSEQ, '1', 'O', '2', 'X') AS ITEMSEQ_OX
+            , C.ANSWER
+            , C.ISRIGHT
+            , B.VAL AS SUM_VAL
+            , C.VAL
+            , A.PUB_TYPE
+            , A.TITLE
+            , A.EXAMNO
+            , A.EXAM_TIME
+            , A.EXAM_TIME*60 AS EXAM_TIME_MS
+            , B.EXAM_TIME AS USER_EXAM_TIME
+            , E.UNITY_ID
+            , E.MBERNM
+            , DECODE(A.EXAM_TYPE, 'M', '중간', 'F', '최종') AS EXAM_TYPE_NM
+            , A.EVAL
+            , D.ALLOT
+        FROM TB_LE_EXAM A, TB_LE_EXAM_APPLY B, TB_LE_EXAM_HIST C, TB_LE_EXAM_QUIZ D, TB_CT_UNITY_MBER E
+        WHERE 1=1
+        AND A.EXAMNO = B.EXAMNO 
+        AND B.EXAMNO = C.EXAMNO 
+        AND B.CUSERNO = C.CUSERNO
+        AND A.EXAMNO = D.EXAMNO
+        AND C.QNO = D.QNO
+        AND B.USERNO = E.UNITY_MBERNO 
+		AND A.EXAMNO = #{examNo}
+		AND B.CSEQNO = #{SES_CSEQNO}
+		AND B.CUSERNO = #{cUserNo}
+		AND D.USEYN = 'Y'
+		ORDER BY C.QSEQ
+	</select>
+	
+	<!-- 사용자 실시간 응시시간 저장 -->
+	<update id="updateExamRealTmTime" parameterType="dmap" >
+		UPDATE TB_LE_EXAM_APPLY
+			SET EXAM_TIME = #{examTime}
+			, SUBMITYN = #{submitYn}
+			<if test='submitYn == "Y"'>
+			, EXAM_EDATE = SYSDATE
+			 </if>
+		WHERE 	CUSERNO = #{SES_CUSERNO}
+		AND 	EXAMNO = #{examNo}
+	
+	</update>
+	
+	<!-- 사용자 실시간 정답 저장 -->
+	<update id="updateExamRealTmAns" parameterType="dmap" >
+		UPDATE TB_LE_EXAM_HIST A
+			SET 
+			<if test='qType == "1"'>
+				ITEMSEQ = #{itemSeq}
+			 </if>
+			<if test='qType == "2"'>
+				ITEMSEQ = #{itemSeq}
+			 </if>
+			<if test='qType == "3"'>
+				ANSWER = #{answer}
+			 </if>
+			<if test='qType == "4"'>
+				ANSWER = #{answer}
+			 </if>
+			<if test='qType == "5"'>
+				ANSWER = #{answer}
+			 </if>
+			 <if test='file01 != null and file01 != "" '>
+				, FILE01 = #{file01}
+			 </if>
+		WHERE 	CUSERNO = #{SES_CUSERNO}
+		AND 	EXAMNO  = #{examNo}
+		AND     QSEQ    = #{qSeq}
+	
+	</update>
+	
+		<!-- 과정정보  -->
+	<select id="getOpenTypeInfo" parameterType="dmap" resultType="emap" >
+		SELECT NVL(OPENTYPE, 'D')OPENTYPE
+			, EXAM_PROG_PERCENT 
+		FROM TB_ED_COURSE_SEQ 
+		WHERE CSEQNO = #{SES_CSEQNO}
+	</select>
+	
+		<!-- 시험 제출정보  -->
+	<select id="getExamApplyHistList" parameterType="dmap"  resultMap="clobBinderMap" >
+		SELECT QSEQ
+			, QNO
+			, ANSWER
+			, ITEMSEQ
+			, ROW_NUMBER() OVER (ORDER BY QNO ASC) RNUM
+		FROM TB_LE_EXAM_HIST
+		WHERE CUSERNO = #{SES_CUSERNO}
+		AND EXAMNO = #{examNo}
+		ORDER BY QNO
+	</select>
+	
+	<!-- Bind문제유형 시험 문제정보  -->
+	<select id="examQuizBindInfo" parameterType="dmap"  resultType="emap" >
+		/* examQuizBindInfo */
+		SELECT ALLOT 
+			, RCODE
+			, RTEXT
+		FROM TB_LE_EXAM_QUIZ  
+		WHERE EXAMNO = #{examNo}
+		AND QNO = #{qNo}
+		ORDER BY QNO
+	</select>
+	
+	<!-- Random문제유형 시험 문제정보  -->
+	<select id="examQuizRandomInfo" parameterType="dmap"  resultType="emap" >
+		SELECT
+                T2.ALLOT,
+                T1.QTYPE,
+                T1.RCODE,
+                T1.RTEXT 
+         FROM
+                TB_LE_EXAM_QUIZ T1,
+                TB_LE_EXAM_SECTION T2
+         WHERE
+                T1.SECNO = T2.SECNO
+                AND T1.EXAMNO = T2.EXAMNO
+                AND T1.COURSENO = #{SES_COURSENO}
+                AND T2.EXAMNO = #{examNo}
+                AND T1.QNO = #{qNo}
+	</select>
+	
+	<!-- Set문제유형 시험 문제정보  -->
+	<select id="examQuizSetInfo" parameterType="dmap"  resultType="emap" >
+		 SELECT
+                T1.ALLOT,
+                T1.QTYPE,
+                T1.RCODE,
+                T1.RTEXT
+         FROM
+                TB_LE_EXAM_SQUIZ T1,
+                TB_LE_EXAM_SET T2,
+                TB_LE_EXAM T3
+         WHERE
+                T1.SETNO = T2.SETNO
+                AND T2.SETNO = T3.SETNO
+                AND T1.COURSENO = #{SES_COURSENO}
+                AND T3.EXAMNO = #{examNo}
+                AND T1.QNO = #{qNo}
+	</select>
+	
+	<!-- 시험 응시내역 점수 수정  -->
+	<update id="updateExamApplyHist">
+		/* updateExamApplyHist */
+		UPDATE TB_LE_EXAM_HIST C
+		SET 
+			ISRIGHT = #{ISRIGHT}
+			<if test='ISRIGHT != null and ISRIGHT == "Y"'>
+			, VAL = (
+				 SELECT ROUND( EVAL / (SELECT COUNT(*) FROM TB_LE_EXAM_QUIZ A WHERE A.EXAMNO = B.EXAMNO) , 2) VAL
+				 FROM TB_LE_EXAM B 
+				 WHERE B.EXAMNO = #{examNo}
+			)
+			</if>
+			<if test='ISRIGHT != null and ISRIGHT == "N"'>
+			, VAL = 0
+			</if>
+			, ANSWER = TO_CHAR(#{answer})
+		WHERE CUSERNO = #{SES_CUSERNO}
+		AND EXAMNO = #{examNo}
+		AND QNO = #{qNo}
+		AND QSEQ = #{qSeq}
+	</update>
+	
+	<!-- 시험 응시내역 채점점수 합계 수정  -->
+	<update id="updateExamApply">
+		/* updateExamApply */
+		UPDATE TB_LE_EXAM_APPLY SET 
+			VAL = (SELECT SUM(VAL) FROM TB_LE_EXAM_HIST WHERE CUSERNO = #{SES_CUSERNO} AND EXAMNO = #{examNo})
+			, VAL_DATE = SYSDATE
+		WHERE CUSERNO = #{SES_CUSERNO}
+		AND EXAMNO = #{examNo}
+	</update>
+	
+	<!-- 사전/사후시험 체크 -->
+    <select id="getLeExamBeAfterCnt" parameterType="dmap" resultType="int">
+    	SELECT COUNT(*) FROM TB_LE_EXAM_APPLY
+		WHERE EXAMNO IN (
+		  SELECT EXAMNO FROM TB_LE_EXAM
+		  WHERE CSEQNO = #{cseqno}
+		  AND EXAM_TYPE = #{examType}
+		  AND USEYN = 'Y'
+		)
+		AND CUSERNO = #{SES_CUSERNO}
+		<!-- AND SUBMITYN = 'Y' -->
+    </select>
+    
+    <!-- 사전시험 유무 체크 -->
+    <select id="getLeExamBeChkYn" parameterType="dmap" resultType="int">
+    	SELECT COUNT(*) FROM TB_LE_EXAM WHERE CSEQNO = #{cseqno}
+          AND EXAM_TYPE = #{examType}
+          AND USEYN = 'Y'
+    </select>
+    
+    <!-- 사후시험 점수 > 수강테이블 정보에 업데이트 -->
+	<update id="updateLeCourseUserInfo" parameterType="dmap">
+		UPDATE 
+		    TB_LE_COURSE_USER SET  
+			    EXAM_FINAL_VAL = ROUND((SELECT SUM(VAL) FROM TB_LE_EXAM_HIST WHERE CUSERNO = #{SES_CUSERNO} AND EXAMNO = #{examNo}), 1)
+			    , FINAL_VAL = NVL(FINAL_VAL,0) + ROUND((SELECT SUM(VAL) FROM TB_LE_EXAM_HIST WHERE CUSERNO = #{SES_CUSERNO} AND EXAMNO = #{examNo}), 1)
+		WHERE CUSERNO = #{SES_CUSERNO} 
+	</update>
+	
+	<!-- 최종점수, 수료코드 발급 -->
+	<update id="updateLeCoursePassInfo" parameterType="dmap">
+		UPDATE 
+		    TB_LE_COURSE_USER SET  
+			    ISPASS = #{isPass}
+			    <if test="compCode != null and compCode != ''">
+					, COMPCODE = #{compCode}
+					, COMPDATE = SYSDATE
+				</if>
+		WHERE CUSERNO = #{SES_CUSERNO} 
+	</update>
+	
+	<!-- 성적 점수 합계  -->
+	<select id="getTotalSumInfo" parameterType="dmap"  resultType="float" >
+		/* getTotalSumInfo */
+		 SELECT FINAL_VAL
+		 FROM TB_LE_COURSE_USER 
+		 WHERE CUSERNO = #{SES_CUSERNO} 
+		 AND USEYN = 'Y'
+	</select>
+	
+	<!-- 수료기준점수  -->
+	<select id="getCseqCompValInfo" parameterType="dmap"  resultType="int" >
+		/* getCseqCompValInfo */
+		 SELECT COMP_VAL
+		 FROM TB_ED_COURSE_SEQ 
+		 WHERE CSEQNO = #{SES_CSEQNO} 
+	</select>
+</mapper>

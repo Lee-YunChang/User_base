@@ -1,0 +1,21 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<weblogic-web-app xmlns="http://xmlns.oracle.com/weblogic/weblogic-web-app" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://xmlns.oracle.com/weblogic/weblogic-web-app http://xmlns.oracle.com/weblogic/weblogic-web-app/1.6/weblogic-web-app.xsd">
+     <!-- <session-descriptor>
+        <timeout-secs>3600</timeout-secs>
+           <cookie-name>JSESSIONID</cookie-name>
+           <persistent-store-type>coherence-web</persistent-store-type>
+     </session-descriptor> -->
+     <session-descriptor>
+     	<timeout-secs>7200</timeout-secs>
+     </session-descriptor>
+     <session-descriptor> 
+		  <persistent-store-type>replicated_if_clustered</persistent-store-type> 
+		  <cookie-name>JSESSIONID</cookie-name> 
+		  <cookie-domain>edu.kinfa.or.kr</cookie-domain> 
+	</session-descriptor>
+     <virtual-directory-mapping>
+      <local-path>D:/eGovFrameDev-3.2.0-64bit/workspace/SSFW_WWW/src/main/webapp</local-path>
+      <url-pattern>/edu-data/*</url-pattern>
+     </virtual-directory-mapping>
+<context-root>/</context-root>
+</weblogic-web-app>
